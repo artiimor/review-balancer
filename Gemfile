@@ -5,6 +5,7 @@ source 'https://rubygems.org'
 ruby '3.2.3'
 gem 'bootsnap', require: false
 gem 'connection_pool', '~> 2.4'
+gem 'devise'
 gem 'faraday', '~> 2.9'
 gem 'octokit', '~> 7.1'
 gem 'pg', '~> 1.5'
