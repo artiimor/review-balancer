@@ -2,14 +2,22 @@
 <html>
   <head>
     <title>ReviewBalancer</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
+    <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
   </head>
 
-  <body>
-    <p class="notice"><%= notice %></p>
-    <p class="alert"><%= alert %></p>
+  <body class="min-h-screen bg-slate-50">
+    <% if notice %>
+      <p class="mx-auto mt-4 max-w-md rounded-lg bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700"><%= notice %></p>
+    <% end %>
+    <% if alert %>
+      <p class="mx-auto mt-4 max-w-md rounded-lg bg-red-50 px-4 py-3 text-sm font-medium text-red-700"><%= alert %></p>
+    <% end %>
 
-    <%= yield %>
+    <main class="flex min-h-screen items-center justify-center p-6">
+      <%= yield %>
+    </main>
   </body>
 </html>

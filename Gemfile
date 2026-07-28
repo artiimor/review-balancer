@@ -9,11 +9,13 @@ gem 'devise'
 gem 'faraday', '~> 2.9'
 gem 'octokit', '~> 7.1'
 gem 'pg', '~> 1.5'
+gem 'propshaft'
 gem 'puma', '>= 5.0'
 gem 'rails', '~> 7.1.3'
 gem 'redis', '~> 5.0'
 gem 'rubocop'
 gem 'sidekiq', '~> 7.2'
+gem 'tailwindcss-rails'
 
 group :development, :test do
   gem 'debug', platforms: %w[mri windows]

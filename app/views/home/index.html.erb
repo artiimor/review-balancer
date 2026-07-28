@@ -1,8 +1,21 @@
-<h1>ReviewBalancer</h1>
+<div class="w-full max-w-md rounded-2xl bg-white p-10 text-center shadow-xl ring-1 ring-slate-900/5">
+  <div class="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-600 text-2xl font-bold text-white">
+    RB
+  </div>
 
-<% if user_signed_in? %>
-  <p>Sesión iniciada como <%= current_user.email %></p>
-  <%= button_to "Cerrar sesión", destroy_user_session_path, method: :delete %>
-<% else %>
-  <p><%= link_to "Iniciar sesión", new_user_session_path %></p>
-<% end %>
+  <h1 class="text-2xl font-semibold tracking-tight text-slate-900">ReviewBalancer</h1>
+  <p class="mt-2 text-sm text-slate-500">Reparte las revisiones de pull requests entre tu equipo.</p>
+
+  <div class="mt-8">
+    <% if user_signed_in? %>
+      <p class="text-sm text-slate-600">
+        Sesión iniciada como <span class="font-medium text-slate-900"><%= current_user.email %></span>
+      </p>
+      <%= button_to "Cerrar sesión", destroy_user_session_path, method: :delete,
+            class: "mt-4 w-full rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-700" %>
+    <% else %>
+      <%= link_to "Iniciar sesión", new_user_session_path,
+            class: "inline-flex w-full items-center justify-center rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500" %>
+    <% end %>
+  </div>
+</div>
