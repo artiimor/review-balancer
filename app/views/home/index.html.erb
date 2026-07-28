@@ -1,0 +1,8 @@
+<h1>ReviewBalancer</h1>
+
+<% if user_signed_in? %>
+  <p>Sesión iniciada como <%= current_user.email %></p>
+  <%= button_to "Cerrar sesión", destroy_user_session_path, method: :delete %>
+<% else %>
+  <p><%= link_to "Iniciar sesión", new_user_session_path %></p>
+<% end %>

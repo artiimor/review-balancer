@@ -8,6 +8,7 @@ require 'active_model/railtie'
 require 'active_job/railtie'
 require 'active_record/railtie'
 require 'action_controller/railtie'
+require 'action_mailer/railtie'
 # require "rails/test_unit/railtie"
 
 # Require the gems listed in Gemfile, including any gems
@@ -23,11 +24,6 @@ module ReviewBalancer
     # not contain `.rb` files, or that should not be reloaded or eager loaded.
     # Common ones are `templates`, `generators`, or `middleware`, for example.
     config.autoload_lib(ignore: %w[assets tasks])
-
-    # Only loads a smaller set of middleware suitable for API only apps.
-    # Middleware like session, flash, cookies can be added back manually.
-    # Skip views, helpers and assets when generating a new resource.
-    config.api_only = true
 
     # Los webhooks se procesan en background con Sidekiq (ver Gemfile / docker-compose).
     config.active_job.queue_adapter = :sidekiq
