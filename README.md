@@ -54,6 +54,15 @@ curl http://localhost:3050/up
 docker compose run --rm -e RAILS_ENV=test web bash -c "./bin/rails db:prepare && bundle exec rspec"
 ```
 
+`docker-compose.yml` monta el directorio del proyecto en `/rails` dentro de
+`web`/`sidekiq` (`volumes: - .:/rails`), así que comandos como `rubocop -A`
+corridos con `docker compose exec` modifican tus archivos reales, no solo la
+copia dentro de la imagen:
+
+```bash
+docker compose exec web bundle exec rubocop -A
+```
+
 ## 3. Configurar el webhook en GitHub
 
 En el repo (o en la GitHub App si gestionas varios repos a la vez):

@@ -1,0 +1,8 @@
+#!/bin/bash -e
+
+# If running the rails server or sidekiq, create or migrate the existing database first.
+if { [ "${1}" == "./bin/rails" ] && [ "${2}" == "server" ]; } || { [ "${1}" == "bundle" ] && [ "${3}" == "sidekiq" ]; }; then
+  ./bin/rails db:prepare
+fi
+
+exec "${@}"
