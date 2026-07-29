@@ -23,7 +23,7 @@ class ProcessPullRequestJob < ApplicationJob
 
   def handle_opened(pull_request)
     assignment = ReviewerSelector.assign!(pull_request)
-    SlackNotifier.notify_review_assigned(assignment) if assignment
+    # SlackNotifier.notify_review_assigned(assignment) if assignment
   end
 
   def handle_closed(pull_request, pr_data, repository)

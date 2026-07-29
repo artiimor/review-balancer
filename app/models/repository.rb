@@ -3,6 +3,8 @@
 class Repository < ApplicationRecord
   encrypts :webhook_secret
 
+  belongs_to :user
+
   has_many :pull_requests, dependent: :destroy
 
   validates :github_full_name, presence: true, uniqueness: true

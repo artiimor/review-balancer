@@ -10,14 +10,13 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_07_28_223150) do
+ActiveRecord::Schema[7.1].define(version: 2026_07_29_000202) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
   create_table "contributors", force: :cascade do |t|
     t.string "github_login", null: false
     t.string "name"
-    t.string "slack_user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["github_login"], name: "index_contributors_on_github_login", unique: true
@@ -56,7 +55,9 @@ ActiveRecord::Schema[7.1].define(version: 2026_07_28_223150) do
     t.string "webhook_secret", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "user_id"
     t.index ["github_full_name"], name: "index_repositories_on_github_full_name", unique: true
+    t.index ["user_id"], name: "index_repositories_on_user_id"
   end
 
   create_table "review_assignments", force: :cascade do |t|
