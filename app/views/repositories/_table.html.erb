@@ -1,0 +1,15 @@
+<div id="repository-table" class="overflow-x-auto">
+  <table class="min-w-full divide-y divide-slate-100 text-sm">
+    <thead class="bg-slate-50">
+      <tr>
+        <th class="px-6 py-3 text-left font-medium text-slate-500"><%= t('repository.github_full_name') %></th>
+        <th class="px-6 py-3 text-left font-medium text-slate-500"><%= t('repository.created_at') %></th>
+        <th class="px-6 py-3 text-left font-medium text-slate-500"><%= t('repository.updated_at') %></th>
+        <th class="px-6 py-3 text-left font-medium text-slate-500"></th>
+      </tr>
+    </thead>
+    <tbody id="repositories" class="divide-y divide-slate-100">
+      <%= render partial: 'repositories/repository', collection: repositories %>
+    </tbody>
+  </table>
+</div>

@@ -7,6 +7,7 @@ gem 'bootsnap', require: false
 gem 'connection_pool', '~> 2.4'
 gem 'devise'
 gem 'faraday', '~> 2.9'
+gem 'importmap-rails'
 gem 'octokit', '~> 7.1'
 gem 'pg', '~> 1.5'
 gem 'propshaft'
@@ -15,7 +16,9 @@ gem 'rails', '~> 7.1.3'
 gem 'redis', '~> 5.0'
 gem 'rubocop'
 gem 'sidekiq', '~> 7.2'
+gem 'stimulus-rails'
 gem 'tailwindcss-rails'
+gem 'turbo-rails'
 
 group :development, :test do
   gem 'debug', platforms: %w[mri windows]

@@ -1,0 +1,3 @@
+<%= turbo_frame_tag "repository-modal", data: { action: "turbo:frame-render->repository-modal#show" } do %>
+  <%= render "repositories/modal", repository: @repository %>
+<% end %>

@@ -12,7 +12,7 @@ RSpec.describe 'Webhooks', type: :request do
     "sha256=#{OpenSSL::HMAC.hexdigest(OpenSSL::Digest.new('sha256'), secret, body)}"
   end
 
-  it 'encola ProcessPullRequestJob cuando la firma es válida' do
+  it 'esqueues ProcessPullRequestJob when signature is valid' do
     signature = signature_for(raw_body, 's3cr3t')
 
     expect do
@@ -28,7 +28,7 @@ RSpec.describe 'Webhooks', type: :request do
     expect(response).to have_http_status(:ok)
   end
 
-  it 'devuelve 401 si la firma no coincide' do
+  it 'returns 401 if signature does not match' do
     signature = signature_for(raw_body, 'secreto-equivocado')
 
     post '/webhooks/github',
@@ -42,7 +42,7 @@ RSpec.describe 'Webhooks', type: :request do
     expect(response).to have_http_status(:unauthorized)
   end
 
-  it 'devuelve 404 si el repositorio no está registrado' do
+  it 'returns 404 if the repository is not assigned' do
     unknown_body = raw_body.sub('arturo/demo', 'arturo/otro-repo-no-registrado')
     signature = signature_for(unknown_body, 's3cr3t')
 

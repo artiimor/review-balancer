@@ -1,0 +1,19 @@
+<%= form_for @repository, url: repositories_path, class: "space-y-5" do |f| %>
+  <div>
+    <%= f.label :github_full_name, "Repositorio (owner/repo)", class: "block text-sm font-medium text-slate-700" %>
+    <%= f.text_field :github_full_name, placeholder: "acme/checkout-api",
+          class: "mt-1.5 block w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30" %>
+  </div>
+
+  <div>
+    <%= f.label :webhook_secret, class: "block text-sm font-medium text-slate-700" %>
+    <%= f.password_field :webhook_secret, autocomplete: "off",
+          class: "mt-1.5 block w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30" %>
+    <p class="mt-1 text-xs text-slate-400">Se usa para verificar las firmas del webhook de GitHub.</p>
+  </div>
+
+  <div class="flex items-center justify-end gap-3 pt-2">
+    <%= f.submit "Crear repositorio",
+          class: "cursor-pointer rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500" %>
+  </div>
+<% end %>
