@@ -9,4 +9,8 @@ class ReviewAssignment < ApplicationRecord
   def complete!
     update!(completed_at: Time.zone.now) unless completed_at
   end
+
+  def review_duration_end
+    completed_at || Time.current
+  end
 end
