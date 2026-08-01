@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_07_29_000202) do
+ActiveRecord::Schema[7.1].define(version: 2026_07_31_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -33,6 +33,14 @@ ActiveRecord::Schema[7.1].define(version: 2026_07_29_000202) do
     t.index ["contributor_id", "tech"], name: "index_file_changes_on_contributor_id_and_tech"
     t.index ["contributor_id"], name: "index_file_changes_on_contributor_id"
     t.index ["pull_request_id"], name: "index_file_changes_on_pull_request_id"
+  end
+
+  create_table "file_extension_mappings", force: :cascade do |t|
+    t.string "extension", null: false
+    t.string "tech", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["extension"], name: "index_file_extension_mappings_on_extension", unique: true
   end
 
   create_table "pull_requests", force: :cascade do |t|
@@ -60,6 +68,16 @@ ActiveRecord::Schema[7.1].define(version: 2026_07_29_000202) do
     t.index ["user_id"], name: "index_repositories_on_user_id"
   end
 
+  create_table "repository_contributors", force: :cascade do |t|
+    t.bigint "repository_id", null: false
+    t.bigint "contributor_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["contributor_id"], name: "index_repository_contributors_on_contributor_id"
+    t.index ["repository_id", "contributor_id"], name: "idx_on_repository_id_contributor_id_a09a6bb9b7", unique: true
+    t.index ["repository_id"], name: "index_repository_contributors_on_repository_id"
+  end
+
   create_table "review_assignments", force: :cascade do |t|
     t.bigint "pull_request_id", null: false
     t.bigint "reviewer_id", null: false
@@ -67,6 +85,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_07_29_000202) do
     t.datetime "completed_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "matched_tech"
     t.index ["pull_request_id"], name: "index_review_assignments_on_pull_request_id"
     t.index ["reviewer_id"], name: "index_review_assignments_on_reviewer_id"
   end
@@ -87,6 +106,8 @@ ActiveRecord::Schema[7.1].define(version: 2026_07_29_000202) do
   add_foreign_key "file_changes", "pull_requests"
   add_foreign_key "pull_requests", "contributors", column: "author_id"
   add_foreign_key "pull_requests", "repositories"
+  add_foreign_key "repository_contributors", "contributors"
+  add_foreign_key "repository_contributors", "repositories"
   add_foreign_key "review_assignments", "contributors", column: "reviewer_id"
   add_foreign_key "review_assignments", "pull_requests"
 end
