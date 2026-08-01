@@ -1,0 +1,14 @@
+{
+  "action": "closed",
+  "pull_request": {
+    "number": 42,
+    "title": "lorem ipsun",
+    "user": { "login": "cool author" },
+    "created_at": "2026-07-26T10:00:00Z",
+    "merged": true,
+    "merged_at": "2026-07-28T16:30:00Z"
+  },
+  "repository": {
+    "full_name": "morci/el-sucio"
+  }
+}
