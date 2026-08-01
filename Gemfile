@@ -26,3 +26,7 @@ group :development, :test do
   gem 'rspec-rails', '~> 6.1'
   gem 'webmock', '~> 3.19'
 end
+
+group :test do
+  gem 'simplecov', require: false
+end
