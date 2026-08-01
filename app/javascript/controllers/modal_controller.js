@@ -6,7 +6,6 @@ export default class extends Controller {
   }
 
   close(){
-    console.log(self)
     this.element.classList.add("hidden")
   }
 }

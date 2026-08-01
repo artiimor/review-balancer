@@ -8,7 +8,5 @@ export default class extends Controller {
     setTimeout(function() {
       self.element.remove();
     }, 5000);
-
-    console.log("ASD")
   }
 }
