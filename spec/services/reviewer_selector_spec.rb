@@ -33,6 +33,8 @@ RSpec.describe ReviewerSelector do
     merged_pr_touching(experta_ruby, 'Ruby', lines: 500)
     merged_pr_touching(experta_saturada, 'Ruby', lines: 800)
     merged_pr_touching(novato, 'Ruby', lines: 5)
+
+    allow_any_instance_of(Octokit::Client).to receive(:request_pull_request_review)
   end
 
   it 'prioriza a quien más sabe de la tecnología tocada, entre los candidatos con carga similar' do

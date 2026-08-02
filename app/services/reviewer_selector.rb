@@ -32,6 +32,7 @@ class ReviewerSelector
       matched_tech: matched_tech_for(pull_request, best[:contributor])
     )
     assignment.complete! unless pull_request.state == 'open'
+    assign_reviewer_in_github(pull_request, best[:contributor])
 
     assignment
   end
@@ -42,5 +43,14 @@ class ReviewerSelector
     top_tech, top_score = scores.max_by { |_tech, score| score }
 
     top_tech if top_score&.positive?
+  end
+
+  def self.assign_reviewer_in_github(pull_request, reviewer)
+    client = Octokit::Client.new(access_token: ENV.fetch('GITHUB_ACCESS_TOKEN'))
+    client.request_pull_request_review(
+      pull_request.repository.github_full_name,
+      pull_request.github_number,
+      reviewers: [reviewer.github_login]
+    )
   end
 end

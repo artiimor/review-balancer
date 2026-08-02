@@ -33,7 +33,7 @@ class PullRequestProcessor
 
     case action
     when 'opened'
-      handle_opened(pull_request)
+      handle_opened(pull_request, repository)
     when 'closed'
       handle_closed(pull_request, pr_data, repository)
     end
@@ -43,7 +43,8 @@ class PullRequestProcessor
 
   attr_reader :repository_id, :payload
 
-  def handle_opened(pull_request)
+  def handle_opened(pull_request, repository)
+    record_file_changes(pull_request, repository)
     assignment = ReviewerSelector.assign!(pull_request)
     # SlackNotifier.notify_review_assigned(assignment) if assignment
   end
@@ -59,9 +60,9 @@ class PullRequestProcessor
     pull_request.review_assignments.where(completed_at: nil).find_each(&:complete!)
   end
 
-  # GitHub no incluye la lista de archivos tocados en el payload del webhook
-  # de pull_request — hay que pedirla aparte a la API REST.
   def record_file_changes(pull_request, repository)
+    return if pull_request.file_changes.exists?
+
     files = github_client.pull_request_files(
       repository.github_full_name, pull_request.github_number
     )
