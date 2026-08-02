@@ -40,7 +40,7 @@ class RepositoryDashboardData
   def expertise_rows
     return [] if contributors.empty? || techs.empty?
 
-    scores_by_contributor = contributors.index_with { |c| ExpertiseCalculator.map_for(c) }
+    scores_by_contributor = contributors.index_with { |c| ExpertiseCalculator.map_for(c, repository) }
     thresholds = tercile_thresholds(all_scores(scores_by_contributor))
 
     contributors.map { |contributor| expertise_row(contributor, scores_by_contributor[contributor], thresholds) }

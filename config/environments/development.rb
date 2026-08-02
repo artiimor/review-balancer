@@ -22,6 +22,10 @@ Rails.application.configure do
   # Needed for devise
   config.action_mailer.default_url_options = { host: 'localhost', port: 3000 }
 
+  # Allow ngrok tunnels (URL changes each time you restart ngrok on the free tier).
+  config.hosts << /.*\.ngrok-free\.app/
+  config.hosts << /.*\.ngrok\.io/
+
   config.debug_exception_response_format = :default
 
   # Enable/disable caching. By default caching is disabled.

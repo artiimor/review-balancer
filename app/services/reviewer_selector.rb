@@ -8,9 +8,10 @@ class ReviewerSelector
   def self.rank(pull_request, top_n: 3)
     techs = pull_request.file_changes.pluck(:tech).uniq
     candidates = candidates_for(pull_request)
+    repository = pull_request.repository
 
     ranked = candidates.map do |contributor|
-      expertise = ExpertiseCalculator.score_for_techs(contributor, techs)
+      expertise = ExpertiseCalculator.score_for_techs(contributor, techs, repository)
       load_ = contributor.current_review_load
       score = expertise / (1 + load_)
 
@@ -37,7 +38,7 @@ class ReviewerSelector
 
   def self.matched_tech_for(pull_request, contributor)
     techs = pull_request.file_changes.pluck(:tech).uniq
-    scores = ExpertiseCalculator.map_for(contributor).slice(*techs)
+    scores = ExpertiseCalculator.map_for(contributor, pull_request.repository).slice(*techs)
     top_tech, top_score = scores.max_by { |_tech, score| score }
 
     top_tech if top_score&.positive?
