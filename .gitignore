@@ -11,3 +11,11 @@
 !/.env.example
 
 /config/master.key
+
+/app/assets/builds/*
+!/app/assets/builds/.keep
+
+/coverage/
+
+/graphify-out/
+.claude/

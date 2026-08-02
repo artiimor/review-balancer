@@ -1,0 +1,16 @@
+<div id="pull-requests-table" class="overflow-x-auto">
+  <table class="min-w-full divide-y divide-slate-100 text-sm">
+    <thead class="bg-slate-50">
+      <tr>
+        <th class="px-6 py-3 text-left font-medium text-slate-500">Pull request</th>
+        <th class="px-6 py-3 text-left font-medium text-slate-500">Estado</th>
+        <th class="px-6 py-3 text-left font-medium text-slate-500">Revisor asignado</th>
+        <th class="px-6 py-3 text-left font-medium text-slate-500">Coincide por</th>
+        <th class="px-6 py-3 text-left font-medium text-slate-500">Tiempo de revisión</th>
+      </tr>
+    </thead>
+    <tbody id="pull_requests" class="divide-y divide-slate-100">
+      <%= render partial: 'repositories/pull_request', collection: pull_requests %>
+    </tbody>
+  </table>
+</div>

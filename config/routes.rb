@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 Rails.application.routes.draw do
-  root to: 'repositories#index'
+  root to: 'home#index'
 
   post '/webhooks/github', to: 'webhooks#github'
 
