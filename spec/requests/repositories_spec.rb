@@ -20,6 +20,14 @@ RSpec.describe 'Repositories', type: :request do
       expect(response.body).to include(my_repository.github_full_name)
       expect(response.body).not_to include(other_repository.github_full_name)
     end
+
+    it 'redirects to the sign in page when not authenticated' do
+      sign_out user
+
+      get repositories_path
+
+      expect(response).to redirect_to(new_user_session_path)
+    end
   end
 
   describe '#new' do
@@ -79,6 +87,15 @@ RSpec.describe 'Repositories', type: :request do
         expect(response.body).to include('has already been taken')
       end
     end
+
+    it 'ignores an attempt to assign the repository to another user' do
+      post repositories_path,
+           params: { repository: { github_full_name: 'acme/other', webhook_secret: 's3cr3t', user_id: other_user.id } },
+           headers: headers
+
+      repository = Repository.find_by(github_full_name: 'acme/other')
+      expect(repository.user).to eq(user)
+    end
   end
 
   describe '#delete' do
@@ -102,6 +119,64 @@ RSpec.describe 'Repositories', type: :request do
       end.not_to change(Repository, :count)
 
       expect(response).to have_http_status(:not_found)
+    end
+
+    it 'shows an error message when the repository cannot be deleted' do
+      repository = user.repositories.create!(github_full_name: 'acme/undeletable', webhook_secret: 's3cr3t')
+      allow_any_instance_of(Repository).to receive(:destroy).and_return(false)
+
+      expect do
+        delete repository_path(repository), headers: headers
+      end.not_to change(Repository, :count)
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include('target="general_error"')
+      expect(response.body).to include('No se puede eliminar el repositorio')
+    end
+  end
+
+  describe '#show' do
+    it "renders the repository's pull requests and dashboard data" do
+      repository = user.repositories.create!(github_full_name: 'acme/checkout-api', webhook_secret: 's3cr3t')
+      contributor = create(:contributor, github_login: 'alice')
+      pull_request = create(:pull_request, repository: repository, author: contributor,
+                                            title: 'Fix bug', github_number: 42)
+      create(:review_assignment, pull_request: pull_request, reviewer: contributor)
+
+      get repository_path(repository)
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include(repository.github_full_name)
+      expect(response.body).to include('#42', 'Fix bug')
+      expect(response.body).to include('alice')
+    end
+
+    it 'shows the empty state when the repository has no pull requests' do
+      repository = user.repositories.create!(github_full_name: 'acme/empty-repo', webhook_secret: 's3cr3t')
+
+      get repository_path(repository)
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include('Todavía no hay pull requests registradas para este repositorio.')
+    end
+
+    it "does not allow viewing another user's repository" do
+      other_repository = other_user.repositories.create!(github_full_name: 'acme/not-yours', webhook_secret: 's3cr3t')
+
+      get repository_path(other_repository)
+
+      expect(response).to have_http_status(:not_found)
+    end
+
+    context 'when the user is not authenticated' do
+      it 'redirects to the sign in page' do
+        repository = user.repositories.create!(github_full_name: 'acme/checkout-api', webhook_secret: 's3cr3t')
+        sign_out user
+
+        get repository_path(repository)
+
+        expect(response).to redirect_to(new_user_session_path)
+      end
     end
   end
 end

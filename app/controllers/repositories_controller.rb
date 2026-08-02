@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class RepositoriesController < ApplicationController
+  before_action :authenticate_user!
+
   def index
     @repositories = current_user.repositories
   end
@@ -13,6 +15,9 @@ class RepositoriesController < ApplicationController
     @repository = current_user.repositories.new(repository_params)
 
     if @repository.save
+      ImportRepositoryContributorsJob.perform_later(@repository.id)
+      ImportRepositoryPullRequestsJob.perform_later(@repository.id)
+
       render turbo_stream: [
         turbo_stream.remove('new-repository-modal'),
         turbo_stream.append('repositories', partial: 'repositories/repository', locals: { repository: @repository })
@@ -27,13 +32,19 @@ class RepositoriesController < ApplicationController
   def destroy
     @repository = current_user.repositories.find(params[:id])
 
-    if @repository.delete
+    if @repository.destroy
       render turbo_stream: turbo_stream.remove(@repository)
     else
       render turbo_stream: [turbo_stream.update('general_error',
                                                 partial: 'repositories/error_message',
                                                 locals: { message: 'No se puede eliminar el repositorio' })]
     end
+  end
+
+  def show
+    @repository = current_user.repositories.find(params[:id])
+    @pull_requests = @repository.pull_requests.includes(review_assignments: :reviewer)
+    @dashboard = RepositoryDashboardData.call(@repository)
   end
 
   private

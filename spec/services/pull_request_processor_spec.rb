@@ -20,6 +20,20 @@ RSpec.describe PullRequestProcessor do
       end
     end
 
+    context 'when repository_id does not match an existing repository' do
+      it 'raises ActiveRecord::RecordNotFound' do
+        payload = JSON.parse(file_fixture('github_pull_request_opened.json').read)
+
+        expect { described_class.call(-1, payload) }.to raise_error(ActiveRecord::RecordNotFound)
+      end
+    end
+
+    context 'when the payload is missing the expected pull_request keys' do
+      it 'raises instead of failing gracefully (pending the TODO in the code)' do
+        expect { described_class.call(repository.id, { 'action' => 'opened' }) }.to raise_error(NoMethodError)
+      end
+    end
+
     context 'when action is opened' do
       let(:payload) { JSON.parse(file_fixture('github_pull_request_opened.json').read) }
       let(:contributor_login) { payload['pull_request']['user']['login'] }
@@ -34,7 +48,7 @@ RSpec.describe PullRequestProcessor do
         expect(contributor).to be_present
       end
 
-      it 'reutilizes the contributor if it already exists by github_login' do
+      it 'reuses the contributor if it already exists by github_login' do
         existing_contributor = create(:contributor, github_login: contributor_login)
         expect { described_class.call(repository.id, payload) }.not_to change(Contributor, :count)
         
@@ -121,7 +135,7 @@ RSpec.describe PullRequestProcessor do
     context 'when action is closed and the PR was not merged' do
       let(:payload) { JSON.parse(file_fixture('github_pull_request_closed_not_merged.json').read) }
 
-      it 'actualiza el estado de la pull_request a "closed"' do
+      it 'updates the state of the pull_request to "closed"' do
         pull_request = create(:pull_request, github_number: payload['pull_request']['number'], repository: repository)
         expect(pull_request.state).to eq('open')
 
@@ -131,7 +145,7 @@ RSpec.describe PullRequestProcessor do
         expect(pull_request.state).to eq('closed')
       end
 
-      it 'no crea file_changes' do
+      it 'does not create file_changes' do
         pull_request = create(:pull_request, github_number: payload['pull_request']['number'], repository: repository)
         allow_any_instance_of(Octokit::Client).to receive(:pull_request_files).and_return([])
 
@@ -140,14 +154,14 @@ RSpec.describe PullRequestProcessor do
         expect(FileChange.count).to eq(0)
       end
 
-      it 'no llama a la API de GitHub' do
+      it 'does not call the GitHub API' do
         pull_request = create(:pull_request, github_number: payload['pull_request']['number'], repository: repository)
         expect_any_instance_of(Octokit::Client).not_to receive(:pull_request_files)
 
         described_class.call(repository.id, payload)
       end
 
-      it 'completa los review_assignments pendientes de la pull_request' do
+      it "completes the pull_request's pending review_assignments" do
         pull_request = create(:pull_request, github_number: payload['pull_request']['number'], repository: repository)
         assignment = create(:review_assignment, pull_request: pull_request, completed_at: nil)
 

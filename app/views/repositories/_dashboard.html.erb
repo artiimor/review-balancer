@@ -1,0 +1,86 @@
+<div class="mb-6" data-controller="disclosure">
+  <button type="button" data-action="disclosure#toggle" data-disclosure-target="label"
+          data-show-text="Ver gráficos" data-hide-text="Ocultar gráficos"
+          class="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3.5 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50">
+    <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+      <path d="M3 13.5a1 1 0 0 1 1-1h1.5a1 1 0 0 1 1 1V16a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-2.5Zm5.75-5a1 1 0 0 1 1-1h1.5a1 1 0 0 1 1 1V16a1 1 0 0 1-1 1h-1.5a1 1 0 0 1-1-1V8.5ZM14.5 4a1 1 0 0 1 1-1H17a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1h-1.5a1 1 0 0 1-1-1V4Z" />
+    </svg>
+    <span data-disclosure-target="label">Ver gráficos</span>
+  </button>
+
+  <div class="hidden mt-4 space-y-6" data-disclosure-target="panel">
+    <div class="rounded-2xl bg-white p-6 shadow-xl ring-1 ring-slate-900/5">
+      <h3 class="text-sm font-semibold text-slate-900">Revisiones pendientes por contributor</h3>
+      <p class="mt-0.5 text-xs text-slate-500">Carga actual — la misma señal que usa el balanceador para no saturar a nadie.</p>
+
+      <% if dashboard[:pending_reviews].empty? %>
+        <p class="mt-6 text-sm text-slate-400">Todavía no hay contributors en este repo.</p>
+      <% else %>
+        <% max_pending = [dashboard[:pending_reviews].map(&:pending_reviews).max, 1].max %>
+        <ul class="mt-5 space-y-3">
+          <% dashboard[:pending_reviews].each do |bar| %>
+            <li class="flex items-center gap-3">
+              <span class="w-32 shrink-0 truncate text-sm text-slate-600" title="<%= bar.contributor.github_login %>"><%= bar.contributor.github_login %></span>
+              <div class="flex flex-1 items-center gap-2">
+                <div class="h-5 flex-1 rounded-full bg-slate-100">
+                  <div class="h-5 rounded-full bg-indigo-600 transition hover:bg-indigo-700"
+                       style="width: <%= (bar.pending_reviews.to_f / max_pending * 100).round(1) %>%"
+                       title="<%= bar.contributor.github_login %>: <%= pluralize(bar.pending_reviews, 'revisión pendiente', plural: 'revisiones pendientes') %>">
+                  </div>
+                </div>
+                <span class="w-6 shrink-0 text-right text-sm tabular-nums text-slate-500"><%= bar.pending_reviews %></span>
+              </div>
+            </li>
+          <% end %>
+        </ul>
+      <% end %>
+    </div>
+
+    <div class="rounded-2xl bg-white p-6 shadow-xl ring-1 ring-slate-900/5">
+      <h3 class="text-sm font-semibold text-slate-900">Mapa de expertise por tecnología</h3>
+      <p class="mt-0.5 text-xs text-slate-500">Nivel relativo dentro de este repo — es la señal que decide quién revisa cada PR.</p>
+
+      <% if dashboard[:expertise_rows].empty? %>
+        <p class="mt-6 text-sm text-slate-400">Todavía no hay suficiente historial de PRs mergeadas para calcular expertise.</p>
+      <% else %>
+        <div class="mt-5 overflow-x-auto">
+          <table class="min-w-full border-separate" style="border-spacing: 6px">
+            <thead>
+              <tr>
+                <th class="text-left text-xs font-medium text-slate-500"></th>
+                <% dashboard[:techs].each do |tech| %>
+                  <th class="px-2 text-center text-xs font-medium text-slate-500"><%= tech %></th>
+                <% end %>
+              </tr>
+            </thead>
+            <tbody>
+              <% dashboard[:expertise_rows].each do |row| %>
+                <tr>
+                  <th scope="row" class="whitespace-nowrap pr-3 text-left text-sm font-medium text-slate-700"><%= row[:contributor].github_login %></th>
+                  <% row[:cells].each do |cell| %>
+                    <% level_classes = { "bajo" => "bg-indigo-400 text-slate-900", "medio" => "bg-indigo-600 text-white", "alto" => "bg-indigo-800 text-white" }.fetch(cell.level) %>
+                    <td>
+                      <div class="flex h-9 min-w-[5rem] items-center justify-center rounded-lg text-xs font-medium <%= level_classes %>"
+                           title="<%= cell.contributor.github_login %> · <%= cell.tech %>: nivel <%= cell.level %>">
+                        <%= cell.level %>
+                      </div>
+                    </td>
+                  <% end %>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="mt-4 flex items-center gap-4 text-xs text-slate-500">
+          <span class="font-medium text-slate-600">Nivel:</span>
+          <% [["bajo", "bg-indigo-400"], ["medio", "bg-indigo-600"], ["alto", "bg-indigo-800"]].each do |label, swatch_class| %>
+            <span class="flex items-center gap-1.5">
+              <span class="h-3 w-3 rounded <%= swatch_class %>"></span><%= label %>
+            </span>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

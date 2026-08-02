@@ -3,7 +3,8 @@
 require 'rails_helper'
 
 RSpec.describe ExpertiseCalculator do
-  let(:repository) { Repository.create!(github_full_name: 'arturo/demo', webhook_secret: 's3cr3t') }
+  let(:user) { User.create!(email: 'user@example.com', password: 'password123') }
+  let(:repository) { Repository.create!(github_full_name: 'arturo/demo', webhook_secret: 's3cr3t', user: user) }
   let(:contributor) { Contributor.create!(github_login: 'arturo') }
   let(:other_author) { Contributor.create!(github_login: 'otra-persona') }
 
@@ -18,7 +19,7 @@ RSpec.describe ExpertiseCalculator do
     )
   end
 
-  it 'sube el score de una tecnología cuando hay cambios recientes en ella' do
+  it 'raises the score of a technology when there are recent changes in it' do
     pr = merged_pr(days_ago: 1)
     FileChange.create!(pull_request: pr, contributor: contributor, path: 'app/models/user.rb',
                        tech: 'Ruby', lines_changed: 100)
@@ -28,7 +29,7 @@ RSpec.describe ExpertiseCalculator do
     expect(scores['Ruby']).to be > 0
   end
 
-  it 'hace pesar mucho menos un cambio de hace 6 meses que uno de ayer' do
+  it 'weighs a change from 6 months ago much less than one from yesterday' do
     old_pr = merged_pr(days_ago: 180)
     recent_pr = merged_pr(days_ago: 1)
 
@@ -39,13 +40,13 @@ RSpec.describe ExpertiseCalculator do
 
     scores = described_class.map_for(contributor)
 
-    # Con vida media de 90 días, 180 días de antigüedad decae a 1/4 del peso original.
-    # El total debería estar mucho más cerca de "100 + 100*0.25" que de "100 + 100".
+    # With a 90-day half-life, 180 days of age decays to 1/4 of the original weight.
+    # The total should be much closer to "100 + 100*0.25" than to "100 + 100".
     expect(scores['Ruby']).to be < 175
     expect(scores['Ruby']).to be > 100
   end
 
-  it 'score_for_techs solo suma las tecnologías pedidas, ignorando el resto' do
+  it 'score_for_techs only sums the requested technologies, ignoring the rest' do
     pr = merged_pr(days_ago: 1)
     FileChange.create!(pull_request: pr, contributor: contributor, path: 'a.rb',
                        tech: 'Ruby', lines_changed: 50)
@@ -57,7 +58,22 @@ RSpec.describe ExpertiseCalculator do
     expect(score).to be_within(1).of(50)
   end
 
-  it 'ignora las PRs que no se han mergeado' do
+  it 'map_for returns the hash sorted from highest to lowest score' do
+    pr = merged_pr(days_ago: 1)
+    FileChange.create!(pull_request: pr, contributor: contributor, path: 'a.rb',
+                       tech: 'Ruby', lines_changed: 10)
+    FileChange.create!(pull_request: pr, contributor: contributor, path: 'a.js',
+                       tech: 'JavaScript/Frontend', lines_changed: 100)
+    FileChange.create!(pull_request: pr, contributor: contributor, path: 'a.sql',
+                       tech: 'SQL/Base de datos', lines_changed: 50)
+
+    scores = described_class.map_for(contributor)
+
+    expect(scores.values).to eq(scores.values.sort.reverse)
+    expect(scores.keys.first).to eq('JavaScript/Frontend')
+  end
+
+  it 'ignores PRs that have not been merged' do
     open_pr = PullRequest.create!(
       repository: repository, author: other_author, github_number: 1,
       opened_at: 1.day.ago, state: 'open'

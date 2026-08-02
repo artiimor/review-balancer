@@ -3,7 +3,8 @@
 require 'rails_helper'
 
 RSpec.describe ReviewerSelector do
-  let(:repository) { Repository.create!(github_full_name: 'arturo/demo', webhook_secret: 's3cr3t') }
+  let(:user) { User.create!(email: 'user@example.com', password: 'password123') }
+  let(:repository) { Repository.create!(github_full_name: 'arturo/demo', webhook_secret: 's3cr3t', user: user) }
   let(:author) { Contributor.create!(github_login: 'autora-pr') }
   let(:experta_ruby) { Contributor.create!(github_login: 'experta-ruby') }
   let(:experta_saturada) { Contributor.create!(github_login: 'experta-saturada') }
@@ -73,5 +74,42 @@ RSpec.describe ReviewerSelector do
 
     expect(assignment).to be_persisted
     expect(assignment.pull_request).to eq(pr)
+  end
+
+  it 'assign! no completa la asignación si la PR sigue abierta' do
+    pr = open_pr_touching('Ruby')
+
+    assignment = described_class.assign!(pr)
+
+    expect(assignment.completed_at).to be_nil
+  end
+
+  it 'assign! completa la asignación al momento si la PR ya está cerrada (webhook desordenado o reintento tardío)' do
+    pr = open_pr_touching('Ruby')
+    pr.update!(state: 'merged', merged_at: Time.current)
+
+    assignment = described_class.assign!(pr)
+
+    expect(assignment.completed_at).not_to be_nil
+  end
+
+  it 'matched_tech_for devuelve nil si el mejor candidato no tiene expertise en las techs tocadas' do
+    pr = open_pr_touching('JavaScript/Frontend')
+
+    assignment = described_class.assign!(pr)
+
+    expect(assignment.matched_tech).to be_nil
+  end
+
+  it 'assign! devuelve nil si no hay candidatos disponibles (el autor es el único contributor del repo)' do
+    solo_repo = Repository.create!(github_full_name: 'arturo/solo-repo', webhook_secret: 's3cr3t', user: user)
+    pr = PullRequest.create!(
+      repository: solo_repo, author: author, github_number: rand(1..999_999),
+      opened_at: 1.hour.ago, state: 'open'
+    )
+
+    assignment = described_class.assign!(pr)
+
+    expect(assignment).to be_nil
   end
 end
