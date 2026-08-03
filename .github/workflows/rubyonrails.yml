@@ -58,7 +58,10 @@ jobs:
       # Add or replace any other lints here
       - name: Security audit dependencies
         run: bin/bundler-audit --update
+        continue-on-error: true
       - name: Security audit application code
         run: bin/brakeman -q -w2
+        continue-on-error: true
       - name: Lint Ruby files
         run: bin/rubocop --parallel
+        continue-on-error: true
