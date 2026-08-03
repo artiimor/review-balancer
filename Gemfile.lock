@@ -89,6 +89,8 @@ GEM
     bigdecimal (4.1.2)
     bootsnap (1.24.6)
       msgpack (~> 1.2)
+    brakeman (8.0.5)
+      racc
     builder (3.3.0)
     bundler-audit (0.9.3)
       bundler (>= 1.2.0)
@@ -346,6 +348,7 @@ PLATFORMS
 
 DEPENDENCIES
   bootsnap
+  brakeman
   bundler-audit
   connection_pool (~> 2.4)
   debug
