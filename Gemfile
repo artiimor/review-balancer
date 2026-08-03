@@ -4,6 +4,7 @@ source 'https://rubygems.org'
 
 ruby '3.2.3'
 gem 'bootsnap', require: false
+gem 'bundler-audit'
 gem 'connection_pool', '~> 2.4'
 gem 'devise'
 gem 'faraday', '~> 2.9'
@@ -19,7 +20,6 @@ gem 'sidekiq', '~> 7.2'
 gem 'stimulus-rails'
 gem 'tailwindcss-rails'
 gem 'turbo-rails'
-
 group :development, :test do
   gem 'debug', platforms: %w[mri windows]
   gem 'factory_bot_rails', '~> 6.4'
