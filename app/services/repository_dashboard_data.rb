@@ -5,7 +5,7 @@ class RepositoryDashboardData
   Bar = Struct.new(:contributor, :pending_reviews, keyword_init: true)
   Cell = Struct.new(:contributor, :tech, :score, :level, keyword_init: true)
 
-  LEVELS = %w[bajo medio alto].freeze
+  LEVELS = %w[cero bajo medio alto].freeze
 
   def self.call(repository)
     new(repository).call
@@ -77,6 +77,7 @@ class RepositoryDashboardData
 
   def level_for(score, thresholds)
     low, high = thresholds
+    return 'cero' if score <= 0
     return 'bajo' if score <= low
     return 'medio' if score <= high
 

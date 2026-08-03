@@ -58,7 +58,7 @@
                 <tr>
                   <th scope="row" class="whitespace-nowrap pr-3 text-left text-sm font-medium text-slate-700"><%= row[:contributor].github_login %></th>
                   <% row[:cells].each do |cell| %>
-                    <% level_classes = { "bajo" => "bg-indigo-400 text-slate-900", "medio" => "bg-indigo-600 text-white", "alto" => "bg-indigo-800 text-white" }.fetch(cell.level) %>
+                    <% level_classes = { "cero" => "bg-slate-300 text-slate-900", "bajo" => "bg-indigo-400 text-slate-900", "medio" => "bg-indigo-600 text-white", "alto" => "bg-indigo-800 text-white" }.fetch(cell.level) %>
                     <td>
                       <div class="flex h-9 min-w-[5rem] items-center justify-center rounded-lg text-xs font-medium <%= level_classes %>"
                            title="<%= cell.contributor.github_login %> · <%= cell.tech %>: nivel <%= cell.level %>">
