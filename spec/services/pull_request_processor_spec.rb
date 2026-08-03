@@ -38,12 +38,16 @@ RSpec.describe PullRequestProcessor do
       let(:payload) { JSON.parse(file_fixture('github_pull_request_opened.json').read) }
       let(:contributor_login) { payload['pull_request']['user']['login'] }
 
+      before do
+        allow_any_instance_of(Octokit::Client).to receive(:pull_request_files).and_return([])
+      end
+
       it 'creates a new contributor if one does not exist' do
         contributor = Contributor.find_by(github_login: contributor_login)
         expect(contributor).to be_nil
-        
+
         expect { described_class.call(repository.id, payload) }.to change(Contributor, :count).by(1)
-        
+
         contributor = Contributor.find_by(github_login: contributor_login)
         expect(contributor).to be_present
       end
@@ -51,26 +55,26 @@ RSpec.describe PullRequestProcessor do
       it 'reuses the contributor if it already exists by github_login' do
         existing_contributor = create(:contributor, github_login: contributor_login)
         expect { described_class.call(repository.id, payload) }.not_to change(Contributor, :count)
-        
+
         contributor = Contributor.find_by(github_login: contributor_login)
         expect(contributor).to eq(existing_contributor)
       end
-      
+
       it 'creates the pull_request if it does not exist' do
         pull_request = PullRequest.find_by(github_number: payload['pull_request']['number'], repository: repository)
         expect(pull_request).to be_nil
 
         expect { described_class.call(repository.id, payload) }.to change(PullRequest, :count).by(1)
-        
+
         pull_request = PullRequest.find_by(github_number: payload['pull_request']['number'], repository: repository)
         expect(pull_request).to be_present
       end
-      
+
       it 'is idempotent if a pull_request with that repository_id + github_number already exists' do
         existing_pull_request = create(:pull_request, github_number: payload['pull_request']['number'], repository: repository)
         expect { described_class.call(repository.id, payload) }.not_to change(PullRequest, :count)
       end
-      
+
       it 'calls ReviewerSelector.assign!' do
         expect(ReviewerSelector).to receive(:assign!).with(instance_of(PullRequest))
         described_class.call(repository.id, payload)
@@ -85,6 +89,13 @@ RSpec.describe PullRequestProcessor do
         expect(pull_request.state).to eq('open')
         expect(pull_request.opened_at).to eq(Time.parse(payload['pull_request']['created_at']))
         expect(pull_request.merged_at).to be_nil
+      end
+
+      it 'requests the changed files from the GitHub API' do
+        pull_request = create(:pull_request, github_number: payload['pull_request']['number'], repository: repository)
+        expect_any_instance_of(Octokit::Client).to receive(:pull_request_files).with(repository.github_full_name, pull_request.github_number).and_return([])
+
+        described_class.call(repository.id, payload)
       end
     end
 
