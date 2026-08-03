@@ -36,6 +36,10 @@ Rails.application.configure do
   # Disable request forgery protection in test environment.
   config.action_controller.allow_forgery_protection = false
 
+  # Use the ActiveJob test adapter so have_enqueued_job / perform_enqueued_jobs work,
+  # instead of the :sidekiq adapter configured for all environments in application.rb.
+  config.active_job.queue_adapter = :test
+
   # Print deprecation notices to the stderr.
   config.active_support.deprecation = :stderr
 
