@@ -2,9 +2,10 @@
 
 require 'rails_helper'
 
-RSpec.describe GithubContributorsImporter do
-  describe '.call' do
+RSpec.describe GithubContributorsImporter do # rubocop:disable Metrics/BlockLength
+  describe '.call' do # rubocop:disable Metrics/BlockLength
     let(:repository) { create(:repository, github_full_name: 'acme/checkout-api') }
+    let(:github_access_token) { 'fake_token' }
 
     def github_contributor(login)
       double(login: login)
@@ -19,14 +20,14 @@ RSpec.describe GithubContributorsImporter do
     it 'creates a Contributor for each contributor returned by the GitHub API' do
       stub_contributors('alice', 'bob')
 
-      expect { described_class.call(repository) }.to change(Contributor, :count).by(2)
+      expect { described_class.call(repository, github_access_token) }.to change(Contributor, :count).by(2)
       expect(Contributor.pluck(:github_login)).to contain_exactly('alice', 'bob')
     end
 
     it 'links each contributor to the repository via RepositoryContributor' do
       stub_contributors('alice')
 
-      described_class.call(repository)
+      described_class.call(repository, github_access_token)
 
       contributor = Contributor.find_by(github_login: 'alice')
       expect(repository.repository_contributors.pluck(:contributor_id)).to contain_exactly(contributor.id)
@@ -36,7 +37,7 @@ RSpec.describe GithubContributorsImporter do
       existing = create(:contributor, github_login: 'alice')
       stub_contributors('alice')
 
-      expect { described_class.call(repository) }.not_to change(Contributor, :count)
+      expect { described_class.call(repository, github_access_token) }.not_to change(Contributor, :count)
       expect(repository.repository_contributors.pluck(:contributor_id)).to contain_exactly(existing.id)
     end
 
@@ -45,7 +46,7 @@ RSpec.describe GithubContributorsImporter do
       create(:repository_contributor, repository: repository, contributor: contributor)
       stub_contributors('alice')
 
-      expect { described_class.call(repository) }.not_to change(RepositoryContributor, :count)
+      expect { described_class.call(repository, github_access_token) }.not_to change(RepositoryContributor, :count)
     end
   end
 end

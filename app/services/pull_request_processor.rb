@@ -1,13 +1,15 @@
 # frozen_string_literal: true
 
 class PullRequestProcessor
-  def self.call(repository_id, payload)
-    new(repository_id, payload).call
+  def self.call(repository_id, payload, github_access_token)
+    new(repository_id, payload, github_access_token).call
   end
 
-  def initialize(repository_id, payload)
+  def initialize(repository_id, payload, github_access_token)
+    # TODO controlar que no sean nil, y loggear un error si lo son
     @repository_id = repository_id
     @payload = payload
+    @github_access_token = github_access_token
   end
 
   def call
@@ -93,6 +95,6 @@ class PullRequestProcessor
   end
 
   def github_client
-    @github_client ||= Octokit::Client.new(access_token: ENV.fetch('GITHUB_ACCESS_TOKEN'))
+    @github_client ||= Octokit::Client.new(access_token: @github_access_token)
   end
 end

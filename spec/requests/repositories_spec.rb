@@ -3,8 +3,8 @@
 require 'rails_helper'
 
 RSpec.describe 'Repositories', type: :request do
-  let(:user) { User.create!(email: 'user@example.com', password: 'password123') }
-  let(:other_user) { User.create!(email: 'other@example.com', password: 'password123') }
+  let(:user) { create(:user, email: 'user@example.com') }
+  let(:other_user) { create(:user, email: 'other@example.com') }
   let(:headers) { { 'Accept' => 'text/vnd.turbo-stream.html' } }
 
   before(:example) { sign_in user }
@@ -27,6 +27,17 @@ RSpec.describe 'Repositories', type: :request do
       get repositories_path
 
       expect(response).to redirect_to(new_user_session_path)
+    end
+
+    context 'when the user does not have a GitHub access token' do
+      it 'redirects to the configuration page with an alert' do
+        user.configuration.update(github_access_token: nil)
+
+        get repositories_path
+
+        expect(response).to redirect_to(configuration_path)
+        expect(flash[:alert]).to eq(I18n.t('configuration.github_token_required'))
+      end
     end
   end
 
@@ -176,6 +187,17 @@ RSpec.describe 'Repositories', type: :request do
         get repository_path(repository)
 
         expect(response).to redirect_to(new_user_session_path)
+      end
+    end
+
+    context 'when the user does not have a GitHub access token' do
+      it 'redirects to the configuration page with an alert' do
+        repository = user.repositories.create!(github_full_name: 'acme/checkout-api', webhook_secret: 's3cr3t')
+        user.configuration.update(github_access_token: nil)
+
+        get repository_path(repository)
+        expect(response).to redirect_to(configuration_path)
+        expect(flash[:alert]).to eq(I18n.t('configuration.github_token_required'))
       end
     end
   end

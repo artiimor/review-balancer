@@ -2,9 +2,10 @@
 
 require 'rails_helper'
 
-RSpec.describe GithubPullRequestsImporter do
-  describe '.call' do
+RSpec.describe GithubPullRequestsImporter do # rubocop:disable Metrics/BlockLength
+  describe '.call' do # rubocop:disable Metrics/BlockLength
     let(:repository) { create(:repository, github_full_name: 'acme/checkout-api') }
+    let!(:github_access_token) { 'fake_token' }
 
     def github_pr(number:, login: 'alice', title: 'Some PR', created_at: 1.day.ago, merged_at: 1.day.ago)
       double(number: number, user: double(login: login), title: title, created_at: created_at, merged_at: merged_at)
@@ -27,7 +28,7 @@ RSpec.describe GithubPullRequestsImporter do
         .with(repository.github_full_name, 42)
         .and_return([github_file(filename: 'app/models/user.rb')])
 
-      described_class.call(repository)
+      described_class.call(repository, github_access_token)
 
       pull_request = PullRequest.find_by(repository: repository, github_number: 42)
       expect(pull_request).to be_present
@@ -44,7 +45,7 @@ RSpec.describe GithubPullRequestsImporter do
     it 'ignores pull requests that were closed without being merged' do
       stub_pull_requests(github_pr(number: 7, merged_at: nil))
 
-      expect { described_class.call(repository) }.not_to change(PullRequest, :count)
+      expect { described_class.call(repository, github_access_token) }.not_to change(PullRequest, :count)
     end
 
     it 'stops once it reaches a pull request older than the 1 year lookback' do
@@ -53,7 +54,7 @@ RSpec.describe GithubPullRequestsImporter do
       stub_pull_requests(recent, old)
       allow_any_instance_of(Octokit::Client).to receive(:pull_request_files).and_return([])
 
-      described_class.call(repository)
+      described_class.call(repository, github_access_token)
 
       expect(PullRequest.where(repository: repository).pluck(:github_number)).to contain_exactly(1)
     end
@@ -63,7 +64,7 @@ RSpec.describe GithubPullRequestsImporter do
       stub_pull_requests(github_pr(number: 5, login: 'alice'))
       allow_any_instance_of(Octokit::Client).to receive(:pull_request_files).and_return([])
 
-      expect { described_class.call(repository) }.not_to change(Contributor, :count)
+      expect { described_class.call(repository, github_access_token) }.not_to change(Contributor, :count)
       expect(PullRequest.find_by(github_number: 5).author).to eq(existing_author)
     end
 
@@ -74,7 +75,7 @@ RSpec.describe GithubPullRequestsImporter do
 
       expect_any_instance_of(Octokit::Client).not_to receive(:pull_request_files)
 
-      described_class.call(repository)
+      described_class.call(repository, github_access_token)
     end
 
     it 'paginates through multiple pages of closed pull requests' do
@@ -92,7 +93,7 @@ RSpec.describe GithubPullRequestsImporter do
       )
       allow_any_instance_of(Octokit::Client).to receive(:pull_request_files).and_return([])
 
-      described_class.call(repository)
+      described_class.call(repository, github_access_token)
 
       expect(PullRequest.where(repository: repository).pluck(:github_number)).to contain_exactly(1, 2)
     end

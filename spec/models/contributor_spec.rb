@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe Contributor do # rubocop:disable Metrics/BlockLength
+RSpec.describe Contributor do
   describe 'associations' do
     it {
       is_expected.to have_many(:authored_pull_requests)

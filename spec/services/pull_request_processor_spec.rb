@@ -4,19 +4,20 @@ require 'rails_helper'
 
 RSpec.describe PullRequestProcessor do
   let(:repository) { create(:repository) }
+  let(:github_access_token) { 'fake_token' }
 
   describe '.call' do
     context 'when repository_id is blank' do
       it 'logs an error and returns early' do
         expect(Rails.logger).to receive(:error).with(/repository_id is blank/)
-        described_class.call(nil, { 'pull_request' => {}, 'action' => 'opened' })
+        described_class.call(nil, { 'pull_request' => {}, 'action' => 'opened' }, github_access_token)
       end
     end
 
     context 'when payload is blank' do
       it 'logs an error and returns early' do
         expect(Rails.logger).to receive(:error).with(/payload is blank/)
-        described_class.call(repository.id, nil)
+        described_class.call(repository.id, nil, github_access_token)
       end
     end
 
@@ -24,13 +25,13 @@ RSpec.describe PullRequestProcessor do
       it 'raises ActiveRecord::RecordNotFound' do
         payload = JSON.parse(file_fixture('github_pull_request_opened.json').read)
 
-        expect { described_class.call(-1, payload) }.to raise_error(ActiveRecord::RecordNotFound)
+        expect { described_class.call(-1, payload, github_access_token) }.to raise_error(ActiveRecord::RecordNotFound)
       end
     end
 
     context 'when the payload is missing the expected pull_request keys' do
       it 'raises instead of failing gracefully (pending the TODO in the code)' do
-        expect { described_class.call(repository.id, { 'action' => 'opened' }) }.to raise_error(NoMethodError)
+        expect { described_class.call(repository.id, { 'action' => 'opened' }, github_access_token) }.to raise_error(NoMethodError)
       end
     end
 
@@ -46,7 +47,7 @@ RSpec.describe PullRequestProcessor do
         contributor = Contributor.find_by(github_login: contributor_login)
         expect(contributor).to be_nil
 
-        expect { described_class.call(repository.id, payload) }.to change(Contributor, :count).by(1)
+        expect { described_class.call(repository.id, payload, github_access_token) }.to change(Contributor, :count).by(1)
 
         contributor = Contributor.find_by(github_login: contributor_login)
         expect(contributor).to be_present
@@ -54,7 +55,7 @@ RSpec.describe PullRequestProcessor do
 
       it 'reuses the contributor if it already exists by github_login' do
         existing_contributor = create(:contributor, github_login: contributor_login)
-        expect { described_class.call(repository.id, payload) }.not_to change(Contributor, :count)
+        expect { described_class.call(repository.id, payload, github_access_token) }.not_to change(Contributor, :count)
 
         contributor = Contributor.find_by(github_login: contributor_login)
         expect(contributor).to eq(existing_contributor)
@@ -64,7 +65,7 @@ RSpec.describe PullRequestProcessor do
         pull_request = PullRequest.find_by(github_number: payload['pull_request']['number'], repository: repository)
         expect(pull_request).to be_nil
 
-        expect { described_class.call(repository.id, payload) }.to change(PullRequest, :count).by(1)
+        expect { described_class.call(repository.id, payload, github_access_token) }.to change(PullRequest, :count).by(1)
 
         pull_request = PullRequest.find_by(github_number: payload['pull_request']['number'], repository: repository)
         expect(pull_request).to be_present
@@ -72,16 +73,16 @@ RSpec.describe PullRequestProcessor do
 
       it 'is idempotent if a pull_request with that repository_id + github_number already exists' do
         existing_pull_request = create(:pull_request, github_number: payload['pull_request']['number'], repository: repository)
-        expect { described_class.call(repository.id, payload) }.not_to change(PullRequest, :count)
+        expect { described_class.call(repository.id, payload, github_access_token) }.not_to change(PullRequest, :count)
       end
 
       it 'calls ReviewerSelector.assign!' do
         expect(ReviewerSelector).to receive(:assign!).with(instance_of(PullRequest))
-        described_class.call(repository.id, payload)
+        described_class.call(repository.id, payload, github_access_token)
       end
 
       it 'assigns correct values to the pull_request' do
-        described_class.call(repository.id, payload)
+        described_class.call(repository.id, payload, github_access_token)
         pull_request = PullRequest.find_by(github_number: payload['pull_request']['number'], repository: repository)
 
         expect(pull_request.title).to eq(payload['pull_request']['title'])
@@ -95,7 +96,7 @@ RSpec.describe PullRequestProcessor do
         pull_request = create(:pull_request, github_number: payload['pull_request']['number'], repository: repository)
         expect_any_instance_of(Octokit::Client).to receive(:pull_request_files).with(repository.github_full_name, pull_request.github_number).and_return([])
 
-        described_class.call(repository.id, payload)
+        described_class.call(repository.id, payload, github_access_token)
       end
     end
 
@@ -110,7 +111,7 @@ RSpec.describe PullRequestProcessor do
         expect(pull_request.merged_at).to be_nil
 
         allow_any_instance_of(Octokit::Client).to receive(:pull_request_files).and_return([])
-        described_class.call(repository.id, payload)
+        described_class.call(repository.id, payload, github_access_token)
 
         pull_request.reload
         expect(pull_request.state).to eq('merged')
@@ -121,14 +122,14 @@ RSpec.describe PullRequestProcessor do
         pull_request = create(:pull_request, github_number: payload['pull_request']['number'], repository: repository)
         expect_any_instance_of(Octokit::Client).to receive(:pull_request_files).with(repository.github_full_name, pull_request.github_number).and_return([])
 
-        described_class.call(repository.id, payload)
+        described_class.call(repository.id, payload, github_access_token)
       end
 
       it 'creates a FileChange for each returned file' do
         pull_request = create(:pull_request, github_number: payload['pull_request']['number'], repository: repository)
         expect_any_instance_of(Octokit::Client).to receive(:pull_request_files).with(repository.github_full_name, pull_request.github_number).and_return(files)
 
-        described_class.call(repository.id, payload)
+        described_class.call(repository.id, payload, github_access_token)
 
         expect(FileChange.count).to eq(2)
       end
@@ -137,7 +138,7 @@ RSpec.describe PullRequestProcessor do
         pull_request = create(:pull_request, github_number: payload['pull_request']['number'], repository: repository)
         expect_any_instance_of(Octokit::Client).to receive(:pull_request_files).with(repository.github_full_name, pull_request.github_number).and_return(files)
 
-        described_class.call(repository.id, payload)
+        described_class.call(repository.id, payload, github_access_token)
 
         expect(FileChange.first.tech).to eq(FileLanguageMapper.tech_for(files.first.filename))
       end
@@ -150,7 +151,7 @@ RSpec.describe PullRequestProcessor do
         pull_request = create(:pull_request, github_number: payload['pull_request']['number'], repository: repository)
         expect(pull_request.state).to eq('open')
 
-        described_class.call(repository.id, payload)
+        described_class.call(repository.id, payload, github_access_token)
 
         pull_request.reload
         expect(pull_request.state).to eq('closed')
@@ -160,7 +161,7 @@ RSpec.describe PullRequestProcessor do
         pull_request = create(:pull_request, github_number: payload['pull_request']['number'], repository: repository)
         allow_any_instance_of(Octokit::Client).to receive(:pull_request_files).and_return([])
 
-        described_class.call(repository.id, payload)
+        described_class.call(repository.id, payload, github_access_token)
 
         expect(FileChange.count).to eq(0)
       end
@@ -169,14 +170,14 @@ RSpec.describe PullRequestProcessor do
         pull_request = create(:pull_request, github_number: payload['pull_request']['number'], repository: repository)
         expect_any_instance_of(Octokit::Client).not_to receive(:pull_request_files)
 
-        described_class.call(repository.id, payload)
+        described_class.call(repository.id, payload, github_access_token)
       end
 
       it "completes the pull_request's pending review_assignments" do
         pull_request = create(:pull_request, github_number: payload['pull_request']['number'], repository: repository)
         assignment = create(:review_assignment, pull_request: pull_request, completed_at: nil)
 
-        described_class.call(repository.id, payload)
+        described_class.call(repository.id, payload, github_access_token)
 
         assignment.reload
         expect(assignment.completed_at).not_to be_nil
@@ -189,7 +190,7 @@ RSpec.describe PullRequestProcessor do
       it 'does nothing beyond creating the contributor and the pull_request' do
         expect(ReviewerSelector).not_to receive(:assign!)
 
-        described_class.call(repository.id, payload)
+        described_class.call(repository.id, payload, github_access_token)
 
         pull_request = PullRequest.find_by(github_number: payload['pull_request']['number'], repository: repository)
         expect(pull_request.state).to eq('open')

@@ -4,12 +4,8 @@ require 'rails_helper'
 
 RSpec.describe User do
   describe 'associations' do
-    it 'has many repositories' do
-      user = create(:user)
-      repository = create(:repository, user: user)
-
-      expect(user.repositories).to contain_exactly(repository)
-    end
+    it { is_expected.to have_many(:repositories) }
+    it { is_expected.to have_one(:configuration).dependent(:destroy) }
   end
 
   describe 'validations' do

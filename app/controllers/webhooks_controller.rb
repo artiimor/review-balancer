@@ -18,7 +18,7 @@ class WebhooksController < ApplicationController
     event = request.headers['X-GitHub-Event']
 
     if event == 'pull_request' && %w[opened closed].include?(payload['action'])
-      ProcessPullRequestJob.perform_later(repository.id, payload)
+      ProcessPullRequestJob.perform_later(repository.id, payload, repository.user.configuration&.github_access_token)
     end
 
     head :ok
