@@ -45,16 +45,18 @@ module Github
       end
     end
 
-    def record_merged_pull_request(pull_request)
-      author = Contributor.find_or_create_by!(github_login: pull_request.user.login)
+    def record_merged_pull_request(remote_pull_request)
+      author = Contributor.find_or_create_by!(github_login: remote_pull_request.user.login)
 
-      pull_request = PullRequest.find_or_create_by!(repository: repository, github_number: pull_request.number) do |record|
+      pull_request = PullRequest.find_or_create_by!(
+        repository: repository, github_number: remote_pull_request.number
+      ) do |record|
         record.author = author
-        record.title = pull_request.title
-        record.opened_at = pull_request.created_at
+        record.title = remote_pull_request.title
+        record.opened_at = remote_pull_request.created_at
       end
 
-      pull_request.update!(state: 'merged', merged_at: pull_request.merged_at)
+      pull_request.update!(state: 'merged', merged_at: remote_pull_request.merged_at)
 
       record_file_changes(pull_request)
     end

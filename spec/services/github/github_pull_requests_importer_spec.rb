@@ -33,6 +33,7 @@ RSpec.describe Github::GithubPullRequestsImporter do
       pull_request = PullRequest.find_by(repository: repository, github_number: 42)
       expect(pull_request).to be_present
       expect(pull_request.state).to eq('merged')
+      expect(pull_request.merged_at).to be_within(1.second).of(1.day.ago)
       expect(pull_request.author.github_login).to eq('alice')
 
       file_change = pull_request.file_changes.sole

@@ -151,7 +151,7 @@ RSpec.describe RepositoryDashboardData do
 
       row = result[:expertise_rows].find { |r| r[:contributor] == contributor_without }
       expect(row[:cells].first.score).to eq(0.0)
-      expect(row[:cells].first.level).to eq('bajo')
+      expect(row[:cells].first.level).to eq('cero')
     end
   end
 end
