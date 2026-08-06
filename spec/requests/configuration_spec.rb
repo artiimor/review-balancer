@@ -86,9 +86,9 @@ RSpec.describe 'Configuration', type: :request do
     end
   end
 
-  describe '#destroy' do
+  describe '#destroy_github_token' do
     it 'clears the token and redirects with a notice' do
-      delete configuration_path
+      delete destroy_github_token_path
 
       expect(response).to redirect_to(configuration_path)
       expect(flash[:notice]).to eq('GitHub token removed.')
@@ -99,7 +99,26 @@ RSpec.describe 'Configuration', type: :request do
       user.configuration.destroy
       user.reload
 
-      delete configuration_path
+      delete destroy_github_token_path
+
+      expect(response).to redirect_to(configuration_path)
+    end
+  end
+
+  describe '#destroy_gitlab_token' do
+    it 'clears the token and redirects with a notice' do
+      delete destroy_gitlab_token_path
+
+      expect(response).to redirect_to(configuration_path)
+      expect(flash[:notice]).to eq('GitLab token removed.')
+      expect(user.configuration.reload.gitlab_access_token).to be_nil
+    end
+
+    it 'does not raise when the user has no configuration record' do
+      user.configuration.destroy
+      user.reload
+
+      delete destroy_gitlab_token_path
 
       expect(response).to redirect_to(configuration_path)
     end

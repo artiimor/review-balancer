@@ -6,7 +6,9 @@ Rails.application.routes.draw do
   post '/webhooks/github', to: 'webhooks#github'
 
   resources :repositories, only: %i[index new create show destroy]
-  resource :configuration, only: %i[show update destroy], controller: 'configuration'
+  resource :configuration, only: %i[show update], controller: 'configuration'
+  delete '/configuration/github_token', to: 'configuration#destroy_github_token', as: :destroy_github_token
+  delete '/configuration/gitlab_token', to: 'configuration#destroy_gitlab_token', as: :destroy_gitlab_token
 
   # Health check para el load balancer / docker healthcheck.
   get 'up' => 'rails/health#show', as: :rails_health_check

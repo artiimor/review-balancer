@@ -16,45 +16,8 @@
     <% end %>
   </div>
 
-  <div class="overflow-hidden rounded-2xl bg-white shadow-xl ring-1 ring-slate-900/5">
-    <div class="border-b border-slate-100 px-6 py-5">
-      <h2 class="text-base font-semibold text-slate-900">GitHub</h2>
-      <p class="mt-1 text-sm text-slate-500">Token de acceso personal usado para autenticar las llamadas a la API de GitHub.</p>
-    </div>
-
-    <div class="px-6 py-6">
-      <% if @configuration.github_access_token.present? %>
-        <div class="flex items-start justify-between gap-3 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3.5">
-          <div class="flex items-start gap-3">
-            <svg class="mt-0.5 h-5 w-5 shrink-0 text-emerald-600" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M10 1a4 4 0 0 0-4 4v2H5a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-9a1 1 0 0 0-1-1h-1V5a4 4 0 0 0-4-4Zm2 6V5a2 2 0 1 0-4 0v2h4Z" clip-rule="evenodd" />
-            </svg>
-            <div>
-              <p class="text-sm font-medium text-slate-700">Token configurado</p>
-              <p class="mt-0.5 text-xs text-slate-400">Por seguridad, el token no se muestra ni se puede modificar una vez guardado.</p>
-            </div>
-          </div>
-
-          <%= button_to "Eliminar token", configuration_path, method: :delete,
-                form: { class: "shrink-0" },
-                data: { turbo_confirm: "¿Eliminar el token de GitHub? Los repositorios que dependan de él dejarán de funcionar hasta que configures uno nuevo." },
-                class: "cursor-pointer rounded-lg border border-red-200 bg-white px-3 py-1.5 text-xs font-semibold text-red-600 transition hover:bg-red-50" %>
-        </div>
-      <% else %>
-        <%= form_for @configuration, url: configuration_path, method: :patch, class: "space-y-5" do |f| %>
-          <div>
-            <%= f.label :github_access_token, "Token de acceso de GitHub", class: "block text-sm font-medium text-slate-700" %>
-            <%= f.password_field :github_access_token, autocomplete: "off", placeholder: "ghp_xxxxxxxxxxxxxxxxxxxx",
-                  class: "mt-1.5 block w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30" %>
-            <p class="mt-1 text-xs text-slate-400">Genera un token en GitHub con permisos de <code>repo</code> y pégalo aquí. No podrás cambiarlo después de guardarlo.</p>
-          </div>
-
-          <div class="flex items-center justify-end gap-3 pt-2">
-            <%= f.submit "Guardar",
-                  class: "cursor-pointer rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500" %>
-          </div>
-        <% end %>
-      <% end %>
-    </div>
+  <div class="space-y-6">
+    <%= render "github_token" %>
+    <%= render "gitlab_token" %>
   </div>
 </div>
