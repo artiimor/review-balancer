@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe GithubSignatureVerifier do
+RSpec.describe Github::GithubSignatureVerifier do
   let(:secret) { 'test-secret' }
   let(:body) { '{"action":"opened"}' }
 

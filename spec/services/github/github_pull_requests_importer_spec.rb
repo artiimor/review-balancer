@@ -2,8 +2,8 @@
 
 require 'rails_helper'
 
-RSpec.describe GithubPullRequestsImporter do # rubocop:disable Metrics/BlockLength
-  describe '.call' do # rubocop:disable Metrics/BlockLength
+RSpec.describe Github::GithubPullRequestsImporter do
+  describe '.call' do
     let(:repository) { create(:repository, github_full_name: 'acme/checkout-api') }
     let!(:github_access_token) { 'fake_token' }
 

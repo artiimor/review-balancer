@@ -5,6 +5,6 @@ class ImportRepositoryContributorsJob < ApplicationJob
 
   def perform(repository_id, github_access_token)
     repository = Repository.find(repository_id)
-    GithubContributorsImporter.call(repository, github_access_token)
+    Github::GithubContributorsImporter.call(repository, github_access_token)
   end
 end

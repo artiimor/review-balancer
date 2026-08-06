@@ -7,7 +7,7 @@ RSpec.describe ImportRepositoryPullRequestsJob, type: :job do
     it 'calls GithubPullRequestsImporter with the correct repository and access token' do
       repository = create(:repository)
 
-      expect(GithubPullRequestsImporter).to receive(:call).with(repository, 'ghp_test_token')
+      expect(Github::GithubPullRequestsImporter).to receive(:call).with(repository, 'ghp_test_token')
 
       described_class.new.perform(repository.id, 'ghp_test_token')
     end

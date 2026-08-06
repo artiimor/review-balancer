@@ -7,7 +7,7 @@ class WebhooksController < ApplicationController
     repository = Repository.find_by(github_full_name: payload['repository']['full_name'])
     return head :not_found unless repository
 
-    unless GithubSignatureVerifier.valid?(
+    unless Github::GithubSignatureVerifier.valid?(
       payload_body: raw_body,
       signature_header: request.headers['X-Hub-Signature-256'],
       secret: repository.webhook_secret
