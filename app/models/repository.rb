@@ -11,4 +11,6 @@ class Repository < ApplicationRecord
 
   validates :github_full_name, presence: true, uniqueness: true
   validates :webhook_secret, presence: true
+
+  validates :provider, presence: true, inclusion: { in: %w[github gitlab] }
 end

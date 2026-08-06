@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe Repository do # rubocop:disable Metrics/BlockLength
+RSpec.describe Repository do
   describe 'associations' do
     it { is_expected.to belong_to(:user) }
     it { is_expected.to have_many(:pull_requests).dependent(:destroy) }
@@ -16,6 +16,8 @@ RSpec.describe Repository do # rubocop:disable Metrics/BlockLength
     it { is_expected.to validate_presence_of(:github_full_name) }
     it { is_expected.to validate_uniqueness_of(:github_full_name) }
     it { is_expected.to validate_presence_of(:webhook_secret) }
+    it { is_expected.to validate_presence_of(:provider) }
+    it { is_expected.to validate_inclusion_of(:provider).in_array(%w[github gitlab]) }
   end
 
   describe 'webhook_secret encryption' do

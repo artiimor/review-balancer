@@ -1,5 +1,6 @@
 ee:
   repositories:
     github_full_name: Nombre completo en github
+    provider: Proveedor
     created_at: Fecha de creación
     updated_at: Última actualización

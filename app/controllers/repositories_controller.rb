@@ -49,7 +49,7 @@ class RepositoriesController < ApplicationController
   private
 
   def repository_params
-    params.require(:repository).permit(:github_full_name, :webhook_secret)
+    params.require(:repository).permit(:github_full_name, :webhook_secret, :provider)
   end
 
   def enqueue_import_jobs(repository)

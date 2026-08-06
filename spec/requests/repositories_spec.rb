@@ -52,8 +52,8 @@ RSpec.describe 'Repositories', type: :request do
   end
 
   describe '#create' do
-    let(:valid_params) { { repository: { github_full_name: 'acme/new-repo', webhook_secret: 's3cr3t' } } }
-    let(:invalid_params) { { repository: { github_full_name: '', webhook_secret: 's3cr3t' } } }
+    let(:valid_params) { { repository: { github_full_name: 'acme/new-repo', webhook_secret: 's3cr3t', provider: 'github' } } }
+    let(:invalid_params) { { repository: { github_full_name: '', webhook_secret: 's3cr3t', provider: 'github' } } }
 
     context 'with valid params' do
       it 'creates a repository for the current user and closes the modal' do
