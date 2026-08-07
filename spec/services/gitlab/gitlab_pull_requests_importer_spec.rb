@@ -92,5 +92,24 @@ RSpec.describe Gitlab::GitlabPullRequestsImporter do
 
       expect(PullRequest.where(repository: repository).pluck(:github_number)).to contain_exactly(1, 2)
     end
+
+    it "uses the repository owner's configured GitLab URL when building the client" do
+      repository.user.configuration.update!(gitlab_url: 'https://gitlab.example.com')
+      client = instance_double(Gitlab::Client, merge_requests: [])
+      expect(Gitlab).to receive(:client)
+        .with(endpoint: 'https://gitlab.example.com/api/v4', private_token: gitlab_access_token)
+        .and_return(client)
+
+      described_class.call(repository, gitlab_access_token)
+    end
+
+    it 'defaults to gitlab.com when no GitLab URL is configured' do
+      client = instance_double(Gitlab::Client, merge_requests: [])
+      expect(Gitlab).to receive(:client)
+        .with(endpoint: 'https://gitlab.com/api/v4', private_token: gitlab_access_token)
+        .and_return(client)
+
+      described_class.call(repository, gitlab_access_token)
+    end
   end
 end

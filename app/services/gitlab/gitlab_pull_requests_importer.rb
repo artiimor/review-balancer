@@ -2,7 +2,6 @@
 
 module Gitlab
   class GitlabPullRequestsImporter
-    API_ENDPOINT = 'https://gitlab.com/api/v4'
     LOOKBACK = 1.year
 
     def self.call(repository, gitlab_access_token)
@@ -87,7 +86,13 @@ module Gitlab
     end
 
     def gitlab_client
-      @gitlab_client ||= ::Gitlab.client(endpoint: API_ENDPOINT, private_token: @gitlab_access_token)
+      @gitlab_client ||= ::Gitlab.client(
+        endpoint: endpoint, private_token: @gitlab_access_token
+      )
+    end
+
+    def endpoint
+      repository.user.configuration.gitlab_api_endpoint
     end
   end
 end

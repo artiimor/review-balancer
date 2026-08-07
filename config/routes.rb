@@ -4,6 +4,7 @@ Rails.application.routes.draw do
   root to: 'home#index'
 
   post '/webhooks/github', to: 'webhooks#github'
+  post '/webhooks/gitlab', to: 'webhooks#gitlab'
 
   resources :repositories, only: %i[index new create show destroy]
   resource :configuration, only: %i[show update], controller: 'configuration'

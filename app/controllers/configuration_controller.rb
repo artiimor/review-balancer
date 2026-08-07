@@ -54,6 +54,6 @@ class ConfigurationController < ApplicationController
   end
 
   def configuration_params
-    params.require(:configuration).permit(:github_access_token, :gitlab_access_token)
+    params.require(:configuration).permit(:github_access_token, :gitlab_access_token, :gitlab_url)
   end
 end

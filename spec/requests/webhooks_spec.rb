@@ -90,4 +90,79 @@ RSpec.describe 'Webhooks', type: :request do
 
     expect(response).to have_http_status(:not_found)
   end
+
+  describe '/webhooks/gitlab' do
+    let!(:gitlab_repository) do
+      Repository.create!(
+        github_full_name: 'acme/checkout-api-gitlab', webhook_secret: 's3cr3t', user: user, provider: 'gitlab'
+      )
+    end
+    let(:gitlab_body) { file_fixture('gitlab_merge_request_opened.json').read }
+
+    def post_gitlab_webhook(body:, token:, event: 'Merge Request Hook')
+      post '/webhooks/gitlab',
+           params: body,
+           headers: {
+             'Content-Type' => 'application/json',
+             'X-Gitlab-Event' => event,
+             'X-Gitlab-Token' => token
+           }
+    end
+
+    it 'enqueues ProcessPullRequestJob when the token is valid' do
+      expect do
+        post_gitlab_webhook(body: gitlab_body, token: 's3cr3t')
+      end.to have_enqueued_job(ProcessPullRequestJob)
+
+      expect(response).to have_http_status(:ok)
+    end
+
+    it 'returns 401 if the token does not match' do
+      post_gitlab_webhook(body: gitlab_body, token: 'secreto-equivocado')
+
+      expect(response).to have_http_status(:unauthorized)
+    end
+
+    it 'returns 401 if no token header is sent' do
+      post '/webhooks/gitlab',
+           params: gitlab_body,
+           headers: { 'Content-Type' => 'application/json', 'X-Gitlab-Event' => 'Merge Request Hook' }
+
+      expect(response).to have_http_status(:unauthorized)
+    end
+
+    it 'returns 200 without enqueuing a job for events other than Merge Request Hook' do
+      expect do
+        post_gitlab_webhook(body: gitlab_body, token: 's3cr3t', event: 'Push Hook')
+      end.not_to have_enqueued_job(ProcessPullRequestJob)
+
+      expect(response).to have_http_status(:ok)
+    end
+
+    it 'returns 200 without enqueuing a job for merge request actions other than open/close/merge' do
+      body = gitlab_body.sub('"action": "open"', '"action": "update"')
+
+      expect do
+        post_gitlab_webhook(body: body, token: 's3cr3t')
+      end.not_to have_enqueued_job(ProcessPullRequestJob)
+
+      expect(response).to have_http_status(:ok)
+    end
+
+    it 'returns 404 if the repository is not assigned' do
+      unknown_body = gitlab_body.sub('acme/checkout-api-gitlab', 'acme/otro-repo-no-registrado')
+
+      post_gitlab_webhook(body: unknown_body, token: 's3cr3t')
+
+      expect(response).to have_http_status(:not_found)
+    end
+
+    it 'returns 404 if the matching repository is registered as github, not gitlab' do
+      gitlab_repository.update!(provider: 'github')
+
+      post_gitlab_webhook(body: gitlab_body, token: 's3cr3t')
+
+      expect(response).to have_http_status(:not_found)
+    end
+  end
 end

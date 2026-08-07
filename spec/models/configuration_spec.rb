@@ -34,4 +34,18 @@ RSpec.describe Configuration, type: :model do
       expect(configuration.reload.gitlab_access_token).to eq('super-secreto')
     end
   end
+
+  describe '#gitlab_api_endpoint' do
+    it 'defaults to gitlab.com when no gitlab_url is set' do
+      configuration = build(:configuration, gitlab_url: nil)
+
+      expect(configuration.gitlab_api_endpoint).to eq('https://gitlab.com/api/v4')
+    end
+
+    it 'builds the endpoint from the configured gitlab_url' do
+      configuration = build(:configuration, gitlab_url: 'https://gitlab.example.com')
+
+      expect(configuration.gitlab_api_endpoint).to eq('https://gitlab.example.com/api/v4')
+    end
+  end
 end

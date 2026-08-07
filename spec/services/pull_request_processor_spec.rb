@@ -35,6 +35,27 @@ RSpec.describe PullRequestProcessor do
       end
     end
 
+    context 'when the repository provider is github' do
+      let(:payload) { { 'action' => 'opened' } }
+
+      it 'delegates to Github::GithubPullRequestProcessor' do
+        expect(Github::GithubPullRequestProcessor).to receive(:call).with(repository, payload, github_access_token)
+
+        described_class.call(repository.id, payload, github_access_token)
+      end
+    end
+
+    context 'when the repository provider is gitlab' do
+      let(:repository) { create(:repository, provider: 'gitlab') }
+      let(:payload) { { 'object_attributes' => { 'action' => 'open' } } }
+
+      it 'delegates to Gitlab::GitlabPullRequestProcessor' do
+        expect(Gitlab::GitlabPullRequestProcessor).to receive(:call).with(repository, payload, github_access_token)
+
+        described_class.call(repository.id, payload, github_access_token)
+      end
+    end
+
     context 'when action is opened' do
       let(:payload) { JSON.parse(file_fixture('github_pull_request_opened.json').read) }
       let(:contributor_login) { payload['pull_request']['user']['login'] }

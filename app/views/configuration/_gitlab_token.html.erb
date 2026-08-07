@@ -14,6 +14,7 @@
           <div>
             <p class="text-sm font-medium text-slate-700">Token configurado</p>
             <p class="mt-0.5 text-xs text-slate-400">Por seguridad, el token no se muestra ni se puede modificar una vez guardado.</p>
+            <p class="mt-1 text-xs text-slate-400">Instancia: <%= @configuration.gitlab_url.presence || Configuration::DEFAULT_GITLAB_URL %></p>
           </div>
         </div>
 
@@ -24,6 +25,13 @@
       </div>
     <% else %>
       <%= form_for @configuration, url: configuration_path, method: :patch, class: "space-y-5" do |f| %>
+        <div>
+          <%= f.label :gitlab_url, "URL de la instancia de GitLab", class: "block text-sm font-medium text-slate-700" %>
+          <%= f.text_field :gitlab_url, autocomplete: "off", placeholder: "https://gitlab.com",
+                class: "mt-1.5 block w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30" %>
+          <p class="mt-1 text-xs text-slate-400">Déjalo en blanco si usas gitlab.com. Si usas una instancia self-hosted, indica su URL, por ejemplo <code>https://gitlab.miempresa.com</code>.</p>
+        </div>
+
         <div>
           <%= f.label :gitlab_access_token, "Token de acceso de GitLab", class: "block text-sm font-medium text-slate-700" %>
           <%= f.password_field :gitlab_access_token, autocomplete: "off", placeholder: "glpat-xxxxxxxxxxxxxxxxxxxx",

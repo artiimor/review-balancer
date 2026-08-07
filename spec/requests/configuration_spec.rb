@@ -86,6 +86,19 @@ RSpec.describe 'Configuration', type: :request do
     end
   end
 
+  describe '#update gitlab_url' do
+    before { user.configuration.update!(gitlab_access_token: nil, gitlab_url: nil) }
+
+    it 'sets a custom GitLab URL alongside the token' do
+      patch configuration_path, params: {
+        configuration: { gitlab_access_token: 'glpat_new_token', gitlab_url: 'https://gitlab.example.com' }
+      }
+
+      expect(response).to redirect_to(configuration_path)
+      expect(user.configuration.reload.gitlab_url).to eq('https://gitlab.example.com')
+    end
+  end
+
   describe '#destroy_github_token' do
     it 'clears the token and redirects with a notice' do
       delete destroy_github_token_path

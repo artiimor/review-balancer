@@ -53,9 +53,13 @@ class RepositoriesController < ApplicationController
   end
 
   def enqueue_import_jobs(repository)
-    github_access_token = current_user.configuration&.github_access_token
+    access_token = if repository.provider == 'gitlab'
+                     current_user.configuration&.gitlab_access_token
+                   else
+                     current_user.configuration&.github_access_token
+                   end
 
-    ImportRepositoryContributorsJob.perform_later(repository.id, github_access_token)
-    ImportRepositoryPullRequestsJob.perform_later(repository.id, github_access_token)
+    ImportRepositoryContributorsJob.perform_later(repository.id, access_token)
+    ImportRepositoryPullRequestsJob.perform_later(repository.id, access_token)
   end
 end

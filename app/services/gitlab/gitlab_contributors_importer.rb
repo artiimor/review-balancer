@@ -2,8 +2,6 @@
 
 module Gitlab
   class GitlabContributorsImporter
-    API_ENDPOINT = 'https://gitlab.com/api/v4'
-
     def self.call(repository, gitlab_access_token)
       new(repository, gitlab_access_token).call
     end
@@ -26,7 +24,9 @@ module Gitlab
     attr_reader :repository
 
     def gitlab_client
-      @gitlab_client ||= ::Gitlab.client(endpoint: API_ENDPOINT, private_token: @gitlab_access_token)
+      @gitlab_client ||= ::Gitlab.client(
+        endpoint: repository.user.configuration.gitlab_api_endpoint, private_token: @gitlab_access_token
+      )
     end
   end
 end
