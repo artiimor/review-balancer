@@ -38,7 +38,7 @@ class RepositoriesController < ApplicationController
     else
       render turbo_stream: [turbo_stream.update('general_error',
                                                 partial: 'repositories/error_message',
-                                                locals: { message: 'No se puede eliminar el repositorio' })]
+                                                locals: { message: t('controllers.repositories.destroy_error') })]
     end
   end
 

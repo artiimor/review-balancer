@@ -2,13 +2,13 @@
   <div class="w-full max-w-md rounded-2xl bg-white p-8 shadow-xl ring-1 ring-slate-900/5">
     <div class="mb-6 flex items-start justify-between">
       <div>
-        <h2 class="text-lg font-semibold tracking-tight text-slate-900">Nuevo repositorio</h2>
-        <p class="mt-0.5 text-sm text-slate-500">Conecta un repositorio de GitHub para repartir sus revisiones.</p>
+        <h2 class="text-lg font-semibold tracking-tight text-slate-900"><%= t('views.repositories.modal.title') %></h2>
+        <p class="mt-0.5 text-sm text-slate-500"><%= t('views.repositories.modal.description') %></p>
       </div>
       <button type="button"
               id="modal-button"
               data-action="click->modal#close"
-              class="rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600" aria-label="Cerrar">
+              class="rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600" aria-label="<%= t('views.repositories.modal.close_aria') %>">
         <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
           <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 0 1 1.414 0L10 8.586l4.293-4.293a1 1 0 1 1 1.414 1.414L11.414 10l4.293 4.293a1 1 0 0 1-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 0 1-1.414-1.414L8.586 10 4.293 5.707a1 1 0 0 1 0-1.414Z" clip-rule="evenodd" />
         </svg>

@@ -1,7 +1,7 @@
 <div class="overflow-hidden rounded-2xl bg-white shadow-xl ring-1 ring-slate-900/5">
   <div class="border-b border-slate-100 px-6 py-5">
     <h2 class="text-base font-semibold text-slate-900">GitLab</h2>
-    <p class="mt-1 text-sm text-slate-500">Token de acceso personal usado para autenticar las llamadas a la API de GitLab.</p>
+    <p class="mt-1 text-sm text-slate-500"><%= t('views.configuration.gitlab_token.description') %></p>
   </div>
 
   <div class="px-6 py-6">
@@ -12,35 +12,35 @@
             <path fill-rule="evenodd" d="M10 1a4 4 0 0 0-4 4v2H5a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-9a1 1 0 0 0-1-1h-1V5a4 4 0 0 0-4-4Zm2 6V5a2 2 0 1 0-4 0v2h4Z" clip-rule="evenodd" />
           </svg>
           <div>
-            <p class="text-sm font-medium text-slate-700">Token configurado</p>
-            <p class="mt-0.5 text-xs text-slate-400">Por seguridad, el token no se muestra ni se puede modificar una vez guardado.</p>
-            <p class="mt-1 text-xs text-slate-400">Instancia: <%= @configuration.gitlab_url.presence || Configuration::DEFAULT_GITLAB_URL %></p>
+            <p class="text-sm font-medium text-slate-700"><%= t('views.configuration.gitlab_token.configured_label') %></p>
+            <p class="mt-0.5 text-xs text-slate-400"><%= t('views.configuration.gitlab_token.configured_hint') %></p>
+            <p class="mt-1 text-xs text-slate-400"><%= t('views.configuration.gitlab_token.instance_label') %>: <%= @configuration.gitlab_url.presence || Configuration::DEFAULT_GITLAB_URL %></p>
           </div>
         </div>
 
-        <%= button_to "Eliminar token", destroy_gitlab_token_path, method: :delete,
+        <%= button_to t('views.configuration.gitlab_token.delete_button'), destroy_gitlab_token_path, method: :delete,
               form: { class: "shrink-0" },
-              data: { turbo_confirm: "¿Eliminar el token de GitLab? Los repositorios que dependan de él dejarán de funcionar hasta que configures uno nuevo." },
+              data: { turbo_confirm: t('views.configuration.gitlab_token.delete_confirm') },
               class: "cursor-pointer rounded-lg border border-red-200 bg-white px-3 py-1.5 text-xs font-semibold text-red-600 transition hover:bg-red-50" %>
       </div>
     <% else %>
       <%= form_for @configuration, url: configuration_path, method: :patch, class: "space-y-5" do |f| %>
         <div>
-          <%= f.label :gitlab_url, "URL de la instancia de GitLab", class: "block text-sm font-medium text-slate-700" %>
-          <%= f.text_field :gitlab_url, autocomplete: "off", placeholder: "https://gitlab.com",
+          <%= f.label :gitlab_url, t('views.configuration.gitlab_token.url_label'), class: "block text-sm font-medium text-slate-700" %>
+          <%= f.text_field :gitlab_url, autocomplete: "off", placeholder: t('views.configuration.gitlab_token.url_placeholder'),
                 class: "mt-1.5 block w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30" %>
-          <p class="mt-1 text-xs text-slate-400">Déjalo en blanco si usas gitlab.com. Si usas una instancia self-hosted, indica su URL, por ejemplo <code>https://gitlab.miempresa.com</code>.</p>
+          <p class="mt-1 text-xs text-slate-400"><%= t('views.configuration.gitlab_token.url_hint_html') %></p>
         </div>
 
         <div>
-          <%= f.label :gitlab_access_token, "Token de acceso de GitLab", class: "block text-sm font-medium text-slate-700" %>
-          <%= f.password_field :gitlab_access_token, autocomplete: "off", placeholder: "glpat-xxxxxxxxxxxxxxxxxxxx",
+          <%= f.label :gitlab_access_token, t('views.configuration.gitlab_token.token_label'), class: "block text-sm font-medium text-slate-700" %>
+          <%= f.password_field :gitlab_access_token, autocomplete: "off", placeholder: t('views.configuration.gitlab_token.token_placeholder'),
                 class: "mt-1.5 block w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30" %>
-          <p class="mt-1 text-xs text-slate-400">Genera un token en GitLab con el scope <code>api</code> y pégalo aquí. No podrás cambiarlo después de guardarlo.</p>
+          <p class="mt-1 text-xs text-slate-400"><%= t('views.configuration.gitlab_token.token_hint_html') %></p>
         </div>
 
         <div class="flex items-center justify-end gap-3 pt-2">
-          <%= f.submit "Guardar",
+          <%= f.submit t('views.configuration.gitlab_token.submit'),
                 class: "cursor-pointer rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500" %>
         </div>
       <% end %>

@@ -3,11 +3,11 @@
     RB
   </div>
 
-  <h1 class="text-2xl font-semibold tracking-tight text-slate-900">ReviewBalancer</h1>
-  <p class="mt-2 text-sm text-slate-500">Reparte las revisiones de pull requests entre tu equipo.</p>
+  <h1 class="text-2xl font-semibold tracking-tight text-slate-900"><%= t('views.home.index.title') %></h1>
+  <p class="mt-2 text-sm text-slate-500"><%= t('views.home.index.subtitle') %></p>
 
   <div class="mt-8">
-    <%= link_to "Iniciar sesión", new_user_session_path,
+    <%= link_to t('views.home.index.sign_in'), new_user_session_path,
           class: "inline-flex w-full items-center justify-center rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500" %>
   </div>
 </div>

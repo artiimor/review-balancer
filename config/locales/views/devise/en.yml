@@ -1,0 +1,75 @@
+en:
+  views:
+    devise:
+      sessions:
+        new:
+          heading: "Sign in"
+          subtitle: "Access your ReviewBalancer account"
+          submit: "Sign in"
+      registrations:
+        new:
+          heading: "Create your account"
+          submit: "Create account"
+          password_minimum: "(%{count} characters minimum)"
+        edit:
+          heading: "Edit %{resource}"
+          currently_waiting_confirmation: "Currently waiting confirmation for:"
+          password_leave_blank: "(leave blank if you don't want to change it)"
+          password_minimum: "%{count} characters minimum"
+          current_password_hint: "(we need your current password to confirm your changes)"
+          update_submit: "Update"
+          cancel_heading: "Cancel my account"
+          unhappy: "Unhappy?"
+          cancel_button: "Cancel my account"
+          cancel_confirm: "Are you sure?"
+          back: "Back"
+      passwords:
+        new:
+          heading: "Forgot your password?"
+          subtitle: "We'll send you instructions by email"
+          submit: "Send instructions"
+        edit:
+          heading: "Change your password"
+          new_password_label: "New password"
+          minimum_characters: "(%{count} characters minimum)"
+          confirm_password_label: "Confirm new password"
+          submit: "Change my password"
+      confirmations:
+        new:
+          heading: "Resend confirmation instructions"
+          submit: "Resend confirmation instructions"
+      unlocks:
+        new:
+          heading: "Resend unlock instructions"
+          submit: "Resend unlock instructions"
+      shared:
+        links:
+          log_in: "Log in"
+          sign_up: "Sign up"
+          forgot_password: "Forgot your password?"
+          resend_confirmation: "Didn't receive confirmation instructions?"
+          resend_unlock: "Didn't receive unlock instructions?"
+          sign_in_with: "Sign in with %{provider}"
+      mailer:
+        confirmation_instructions:
+          welcome: "Welcome %{email}!"
+          intro: "You can confirm your account email through the link below:"
+          link: "Confirm my account"
+        email_changed:
+          hello: "Hello %{email}!"
+          unconfirmed_notice: "We're contacting you to notify you that your email is being changed to %{email}."
+          changed_notice: "We're contacting you to notify you that your email has been changed to %{email}."
+        password_change:
+          hello: "Hello %{email}!"
+          notice: "We're contacting you to notify you that your password has been changed."
+        reset_password_instructions:
+          hello: "Hello %{email}!"
+          intro: "Someone has requested a link to change your password. You can do this through the link below."
+          link: "Change my password"
+          ignore_notice: "If you didn't request this, please ignore this email."
+          expiry_notice: "Your password won't change until you access the link above and create a new one."
+        unlock_instructions:
+          hello: "Hello %{email}!"
+          intro: "Your account has been locked due to an excessive number of unsuccessful sign in attempts."
+          link_intro: "Click the link below to unlock your account:"
+          link: "Unlock my account"

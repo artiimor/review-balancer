@@ -1,0 +1,7 @@
+es:
+  views:
+    home:
+      index:
+        title: "ReviewBalancer"
+        subtitle: "Reparte las revisiones de pull requests entre tu equipo."
+        sign_in: "Iniciar sesión"

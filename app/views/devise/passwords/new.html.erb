@@ -3,8 +3,8 @@
     RB
   </div>
 
-  <h2 class="text-center text-2xl font-semibold tracking-tight text-slate-900">¿Olvidaste tu contraseña?</h2>
-  <p class="mt-1 text-center text-sm text-slate-500">Te enviaremos instrucciones por email</p>
+  <h2 class="text-center text-2xl font-semibold tracking-tight text-slate-900"><%= t('views.devise.passwords.new.heading') %></h2>
+  <p class="mt-1 text-center text-sm text-slate-500"><%= t('views.devise.passwords.new.subtitle') %></p>
 
   <%= form_for(resource, as: resource_name, url: password_path(resource_name), html: { method: :post, class: "mt-8 space-y-5" }) do |f| %>
     <%= render "devise/shared/error_messages", resource: resource %>
@@ -16,7 +16,7 @@
     </div>
 
     <div>
-      <%= f.submit "Enviar instrucciones",
+      <%= f.submit t('views.devise.passwords.new.submit'),
             class: "w-full cursor-pointer rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500" %>
     </div>
   <% end %>

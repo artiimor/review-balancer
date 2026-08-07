@@ -1,0 +1,75 @@
+es:
+  views:
+    devise:
+      sessions:
+        new:
+          heading: "Inicia sesión"
+          subtitle: "Accede a tu cuenta de ReviewBalancer"
+          submit: "Iniciar sesión"
+      registrations:
+        new:
+          heading: "Crea tu cuenta"
+          submit: "Crear cuenta"
+          password_minimum: "(mínimo %{count} caracteres)"
+        edit:
+          heading: "Editar %{resource}"
+          currently_waiting_confirmation: "Esperando confirmación para:"
+          password_leave_blank: "(déjalo en blanco si no quieres cambiarla)"
+          password_minimum: "mínimo %{count} caracteres"
+          current_password_hint: "(necesitamos tu contraseña actual para confirmar los cambios)"
+          update_submit: "Actualizar"
+          cancel_heading: "Cancelar mi cuenta"
+          unhappy: "¿Descontento?"
+          cancel_button: "Cancelar mi cuenta"
+          cancel_confirm: "¿Estás seguro?"
+          back: "Volver"
+      passwords:
+        new:
+          heading: "¿Olvidaste tu contraseña?"
+          subtitle: "Te enviaremos instrucciones por email"
+          submit: "Enviar instrucciones"
+        edit:
+          heading: "Cambia tu contraseña"
+          new_password_label: "Nueva contraseña"
+          minimum_characters: "(mínimo %{count} caracteres)"
+          confirm_password_label: "Confirma la nueva contraseña"
+          submit: "Cambiar mi contraseña"
+      confirmations:
+        new:
+          heading: "Reenviar instrucciones de confirmación"
+          submit: "Reenviar instrucciones de confirmación"
+      unlocks:
+        new:
+          heading: "Reenviar instrucciones de desbloqueo"
+          submit: "Reenviar instrucciones de desbloqueo"
+      shared:
+        links:
+          log_in: "Iniciar sesión"
+          sign_up: "Regístrate"
+          forgot_password: "¿Olvidaste tu contraseña?"
+          resend_confirmation: "¿No recibiste las instrucciones de confirmación?"
+          resend_unlock: "¿No recibiste las instrucciones de desbloqueo?"
+          sign_in_with: "Iniciar sesión con %{provider}"
+      mailer:
+        confirmation_instructions:
+          welcome: "¡Bienvenido/a %{email}!"
+          intro: "Puedes confirmar el email de tu cuenta a través del siguiente enlace:"
+          link: "Confirmar mi cuenta"
+        email_changed:
+          hello: "¡Hola %{email}!"
+          unconfirmed_notice: "Te contactamos para avisarte de que tu email se está cambiando a %{email}."
+          changed_notice: "Te contactamos para avisarte de que tu email ha sido cambiado a %{email}."
+        password_change:
+          hello: "¡Hola %{email}!"
+          notice: "Te contactamos para avisarte de que tu contraseña ha sido cambiada."
+        reset_password_instructions:
+          hello: "¡Hola %{email}!"
+          intro: "Alguien ha solicitado un enlace para cambiar tu contraseña. Puedes hacerlo a través del siguiente enlace."
+          link: "Cambiar mi contraseña"
+          ignore_notice: "Si no solicitaste esto, ignora este email."
+          expiry_notice: "Tu contraseña no cambiará hasta que accedas al enlace anterior y crees una nueva."
+        unlock_instructions:
+          hello: "¡Hola %{email}!"
+          intro: "Tu cuenta ha sido bloqueada debido a un número excesivo de intentos fallidos de inicio de sesión."
+          link_intro: "Haz clic en el siguiente enlace para desbloquear tu cuenta:"
+          link: "Desbloquear mi cuenta"

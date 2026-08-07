@@ -1,0 +1,4 @@
+en:
+  services:
+    slack_notifier:
+      review_assigned: "👀 You've been assigned to review PR #%{number} (\"%{title}\") in %{repository}."

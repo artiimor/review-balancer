@@ -36,7 +36,7 @@ RSpec.describe 'Repositories', type: :request do
         get repositories_path
 
         expect(response).to redirect_to(configuration_path)
-        expect(flash[:alert]).to eq(I18n.t('configuration.github_token_required'))
+        expect(flash[:alert]).to eq(I18n.t('controllers.application.github_token_required'))
       end
     end
   end
@@ -229,7 +229,7 @@ RSpec.describe 'Repositories', type: :request do
 
         get repository_path(repository)
         expect(response).to redirect_to(configuration_path)
-        expect(flash[:alert]).to eq(I18n.t('configuration.github_token_required'))
+        expect(flash[:alert]).to eq(I18n.t('controllers.application.github_token_required'))
       end
     end
   end

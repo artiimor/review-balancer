@@ -9,7 +9,7 @@
     <div class="flex items-center gap-1">
       <%= link_to repository_path(repository),
             class: "rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-indigo-600",
-            "aria-label": "Ver repositorio" do %>
+            "aria-label": t('views.repositories.repository_row.show_aria') do %>
         <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
           <path d="M10 3.5c-4.4 0-8.2 2.6-9.9 6.3 1.7 3.7 5.5 6.3 9.9 6.3s8.2-2.6 9.9-6.3C18.2 6.1 14.4 3.5 10 3.5Zm0 10.6a4.3 4.3 0 1 1 0-8.6 4.3 4.3 0 0 1 0 8.6Z" />
           <path d="M10 8.3a1.9 1.9 0 1 0 0 3.8 1.9 1.9 0 0 0 0-3.8Z" />
@@ -18,9 +18,9 @@
 
       <%= button_to repository_path(repository), method: :delete,
             form: { class: "inline" },
-            data: { turbo_confirm: "¿Eliminar #{repository.github_full_name}?" },
+            data: { turbo_confirm: t('views.repositories.repository_row.delete_confirm', name: repository.github_full_name) },
             class: "cursor-pointer rounded-lg p-1.5 text-slate-400 transition hover:bg-red-50 hover:text-red-600",
-            "aria-label": "Eliminar repositorio" do %>
+            "aria-label": t('views.repositories.repository_row.delete_aria') do %>
         <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
           <path fill-rule="evenodd" d="M8.75 1a1.75 1.75 0 0 0-1.75 1.75V3h-3a.75.75 0 0 0 0 1.5h.3l.7 11.2A2 2 0 0 0 6.99 17.5h6.02a2 2 0 0 0 1.99-1.8l.7-11.2h.3a.75.75 0 0 0 0-1.5h-3v-.25A1.75 1.75 0 0 0 11.25 1h-2.5ZM10 6a.75.75 0 0 1 .75.75v6.5a.75.75 0 0 1-1.5 0v-6.5A.75.75 0 0 1 10 6Zm-2.75.75a.75.75 0 0 0-1.5 0v6.5a.75.75 0 0 0 1.5 0v-6.5Zm5.5 0a.75.75 0 0 0-1.5 0v6.5a.75.75 0 0 0 1.5 0v-6.5Z" clip-rule="evenodd" />
         </svg>

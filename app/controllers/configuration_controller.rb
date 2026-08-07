@@ -4,8 +4,8 @@ class ConfigurationController < ApplicationController
   before_action :authenticate_user!
 
   LOCKED_TOKEN_ALERTS = {
-    github_access_token: 'The GitHub token is already set and cannot be changed.',
-    gitlab_access_token: 'The GitLab token is already set and cannot be changed.'
+    github_access_token: 'controllers.configuration.github_token_locked',
+    gitlab_access_token: 'controllers.configuration.gitlab_token_locked'
   }.freeze
 
   def show
@@ -16,12 +16,12 @@ class ConfigurationController < ApplicationController
     @configuration = current_user.configuration || current_user.build_configuration
 
     if locked_token_alert
-      redirect_to configuration_path, alert: locked_token_alert
+      redirect_to configuration_path, alert: t(locked_token_alert)
       return
     end
 
     if @configuration.update(configuration_params)
-      redirect_to configuration_path, notice: 'Configuration updated successfully.'
+      redirect_to configuration_path, notice: t('controllers.configuration.updated')
     else
       render :show, status: :unprocessable_entity
     end
@@ -31,23 +31,23 @@ class ConfigurationController < ApplicationController
     @configuration = current_user.configuration
     @configuration&.update(github_access_token: nil)
 
-    redirect_to configuration_path, notice: 'GitHub token removed.'
+    redirect_to configuration_path, notice: t('controllers.configuration.github_token_removed')
   end
 
   def destroy_gitlab_token
     @configuration = current_user.configuration
     @configuration&.update(gitlab_access_token: nil)
 
-    redirect_to configuration_path, notice: 'GitLab token removed.'
+    redirect_to configuration_path, notice: t('controllers.configuration.gitlab_token_removed')
   end
 
   private
 
   def locked_token_alert
-    LOCKED_TOKEN_ALERTS.each do |field, alert|
+    LOCKED_TOKEN_ALERTS.each do |field, alert_key|
       next unless configuration_params[field].present? && @configuration.public_send(field).present?
 
-      return alert
+      return alert_key
     end
 
     nil

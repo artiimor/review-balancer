@@ -27,5 +27,9 @@ module ReviewBalancer
 
     # Los webhooks se procesan en background con Sidekiq (ver Gemfile / docker-compose).
     config.active_job.queue_adapter = :sidekiq
+
+    # Idioma por defecto de la aplicación; :en está disponible como alternativa.
+    config.i18n.available_locales = %i[es en]
+    config.i18n.default_locale = :es
   end
 end

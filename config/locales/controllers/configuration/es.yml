@@ -1,0 +1,8 @@
+es:
+  controllers:
+    configuration:
+      github_token_locked: "El token de GitHub ya está configurado y no se puede cambiar."
+      gitlab_token_locked: "El token de GitLab ya está configurado y no se puede cambiar."
+      updated: "Configuración actualizada correctamente."
+      github_token_removed: "Token de GitHub eliminado."
+      gitlab_token_removed: "Token de GitLab eliminado."

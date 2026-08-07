@@ -1,8 +1,0 @@
-en:
-  configuration:
-    github_token_required: You need to set a GitHub access token before managing repositories.
-  repositories:
-    github_full_name: Github full name
-    provider: Provider
-    created_at: Created at
-    updated_at: Updated at

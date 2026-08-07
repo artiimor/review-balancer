@@ -1,0 +1,7 @@
+en:
+  views:
+    home:
+      index:
+        title: "ReviewBalancer"
+        subtitle: "Distributes pull request reviews across your team."
+        sign_in: "Sign in"

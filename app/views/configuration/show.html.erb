@@ -5,14 +5,14 @@
         RB
       </div>
       <div>
-        <h1 class="text-lg font-semibold tracking-tight text-slate-900">Configuración</h1>
+        <h1 class="text-lg font-semibold tracking-tight text-slate-900"><%= t('views.configuration.show.title') %></h1>
         <p class="text-sm text-slate-500"><%= current_user.email %></p>
       </div>
     </div>
 
     <%= link_to repositories_path,
           class: "inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3.5 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50" do %>
-      Volver
+      <%= t('views.configuration.show.back') %>
     <% end %>
   </div>
 

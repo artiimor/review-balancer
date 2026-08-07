@@ -1,0 +1,4 @@
+es:
+  services:
+    slack_notifier:
+      review_assigned: "👀 Te toca revisar la PR #%{number} (\"%{title}\") en %{repository}."

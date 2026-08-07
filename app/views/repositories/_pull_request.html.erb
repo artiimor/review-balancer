@@ -5,13 +5,13 @@
   </td>
   <td class="whitespace-nowrap px-6 py-4">
     <% badge = { "open" => "bg-amber-50 text-amber-700", "merged" => "bg-emerald-50 text-emerald-700", "closed" => "bg-slate-100 text-slate-500" }[pull_request.state] %>
-    <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-medium <%= badge %>"><%= pull_request.state %></span>
+    <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-medium <%= badge %>"><%= t("views.repositories.pull_request.states.#{pull_request.state}", default: pull_request.state) %></span>
   </td>
-  <td class="whitespace-nowrap px-6 py-4 text-slate-600"><%= assignment&.reviewer&.github_login || "Sin asignar" %></td>
-  <td class="whitespace-nowrap px-6 py-4 text-slate-500"><%= assignment&.matched_tech || (assignment ? "Disponibilidad" : "—") %></td>
+  <td class="whitespace-nowrap px-6 py-4 text-slate-600"><%= assignment&.reviewer&.github_login || t('views.repositories.pull_request.unassigned') %></td>
+  <td class="whitespace-nowrap px-6 py-4 text-slate-500"><%= assignment&.matched_tech || (assignment ? t('views.repositories.pull_request.availability') : "—") %></td>
   <td class="whitespace-nowrap px-6 py-4 text-slate-500">
     <% if assignment %>
-      <%= distance_of_time_in_words(assignment.assigned_at, assignment.review_duration_end) %><%= " (en curso)" unless assignment.completed_at %>
+      <%= distance_of_time_in_words(assignment.assigned_at, assignment.review_duration_end) %><%= t('views.repositories.pull_request.in_progress_suffix') unless assignment.completed_at %>
     <% else %>
       —
     <% end %>

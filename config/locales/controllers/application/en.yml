@@ -1,0 +1,4 @@
+en:
+  controllers:
+    application:
+      github_token_required: "You need to set a GitHub access token before managing repositories."

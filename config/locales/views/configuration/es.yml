@@ -1,0 +1,32 @@
+es:
+  views:
+    configuration:
+      show:
+        title: "Configuración"
+        back: "Volver"
+      github_token:
+        heading: "GitHub"
+        description: "Token de acceso personal usado para autenticar las llamadas a la API de GitHub."
+        configured_label: "Token configurado"
+        configured_hint: "Por seguridad, el token no se muestra ni se puede modificar una vez guardado."
+        delete_button: "Eliminar token"
+        delete_confirm: "¿Eliminar el token de GitHub? Los repositorios que dependan de él dejarán de funcionar hasta que configures uno nuevo."
+        label: "Token de acceso de GitHub"
+        placeholder: "ghp_xxxxxxxxxxxxxxxxxxxx"
+        hint_html: "Genera un token en GitHub con permisos de <code>repo</code> y pégalo aquí. No podrás cambiarlo después de guardarlo."
+        submit: "Guardar"
+      gitlab_token:
+        heading: "GitLab"
+        description: "Token de acceso personal usado para autenticar las llamadas a la API de GitLab."
+        configured_label: "Token configurado"
+        configured_hint: "Por seguridad, el token no se muestra ni se puede modificar una vez guardado."
+        instance_label: "Instancia"
+        delete_button: "Eliminar token"
+        delete_confirm: "¿Eliminar el token de GitLab? Los repositorios que dependan de él dejarán de funcionar hasta que configures uno nuevo."
+        url_label: "URL de la instancia de GitLab"
+        url_placeholder: "https://gitlab.com"
+        url_hint_html: "Déjalo en blanco si usas gitlab.com. Si usas una instancia self-hosted, indica su URL, por ejemplo <code>https://gitlab.miempresa.com</code>."
+        token_label: "Token de acceso de GitLab"
+        token_placeholder: "glpat-xxxxxxxxxxxxxxxxxxxx"
+        token_hint_html: "Genera un token en GitLab con el scope <code>api</code> y pégalo aquí. No podrás cambiarlo después de guardarlo."
+        submit: "Guardar"

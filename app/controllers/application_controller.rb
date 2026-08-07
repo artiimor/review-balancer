@@ -5,7 +5,7 @@ class ApplicationController < ActionController::Base
 
   def ensure_github_token
     if current_user && current_user.configuration&.github_access_token.blank?
-      redirect_to configuration_path, alert: t('configuration.github_token_required')
+      redirect_to configuration_path, alert: t('controllers.application.github_token_required')
     end
   end
 end

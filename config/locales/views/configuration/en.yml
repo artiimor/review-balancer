@@ -1,0 +1,32 @@
+en:
+  views:
+    configuration:
+      show:
+        title: "Configuration"
+        back: "Back"
+      github_token:
+        heading: "GitHub"
+        description: "Personal access token used to authenticate calls to the GitHub API."
+        configured_label: "Token configured"
+        configured_hint: "For security reasons, the token isn't shown or editable once saved."
+        delete_button: "Delete token"
+        delete_confirm: "Delete the GitHub token? Repositories that depend on it will stop working until you set a new one."
+        label: "GitHub access token"
+        placeholder: "ghp_xxxxxxxxxxxxxxxxxxxx"
+        hint_html: "Generate a token on GitHub with <code>repo</code> scope and paste it here. You won't be able to change it after saving."
+        submit: "Save"
+      gitlab_token:
+        heading: "GitLab"
+        description: "Personal access token used to authenticate calls to the GitLab API."
+        configured_label: "Token configured"
+        configured_hint: "For security reasons, the token isn't shown or editable once saved."
+        instance_label: "Instance"
+        delete_button: "Delete token"
+        delete_confirm: "Delete the GitLab token? Repositories that depend on it will stop working until you set a new one."
+        url_label: "GitLab instance URL"
+        url_placeholder: "https://gitlab.com"
+        url_hint_html: "Leave it blank if you use gitlab.com. If you use a self-hosted instance, enter its URL, e.g. <code>https://gitlab.mycompany.com</code>."
+        token_label: "GitLab access token"
+        token_placeholder: "glpat-xxxxxxxxxxxxxxxxxxxx"
+        token_hint_html: "Generate a token on GitLab with the <code>api</code> scope and paste it here. You won't be able to change it after saving."
+        submit: "Save"

@@ -1,7 +1,7 @@
 <%= turbo_frame_tag "pull_requests" do %>
   <div class="flex items-center justify-end gap-2 border-b border-slate-100 px-6 py-3 text-sm text-slate-500">
     <%= form_with url: repository_path(repository), method: :get do %>
-      <label for="per" class="mr-2">Por página</label>
+      <label for="per" class="mr-2"><%= t('views.repositories.pull_requests.per_page_label') %></label>
       <select name="per" id="per" onchange="this.form.requestSubmit()"
               class="rounded-lg border-slate-300 text-sm text-slate-700 focus:border-indigo-500 focus:ring-indigo-500">
         <% RepositoriesController::ALLOWED_PER_PAGE.each do |value| %>
@@ -14,11 +14,11 @@
     <table class="min-w-full divide-y divide-slate-100 text-sm">
       <thead class="bg-slate-50">
         <tr>
-          <th class="px-6 py-3 text-left font-medium text-slate-500">Pull request</th>
-          <th class="px-6 py-3 text-left font-medium text-slate-500">Estado</th>
-          <th class="px-6 py-3 text-left font-medium text-slate-500">Revisor asignado</th>
-          <th class="px-6 py-3 text-left font-medium text-slate-500">Coincide por</th>
-          <th class="px-6 py-3 text-left font-medium text-slate-500">Tiempo de revisión</th>
+          <th class="px-6 py-3 text-left font-medium text-slate-500"><%= t('views.repositories.pull_requests.column_pull_request') %></th>
+          <th class="px-6 py-3 text-left font-medium text-slate-500"><%= t('views.repositories.pull_requests.column_state') %></th>
+          <th class="px-6 py-3 text-left font-medium text-slate-500"><%= t('views.repositories.pull_requests.column_reviewer') %></th>
+          <th class="px-6 py-3 text-left font-medium text-slate-500"><%= t('views.repositories.pull_requests.column_matched_by') %></th>
+          <th class="px-6 py-3 text-left font-medium text-slate-500"><%= t('views.repositories.pull_requests.column_review_time') %></th>
         </tr>
       </thead>
       <tbody class="divide-y divide-slate-100">

@@ -1,0 +1,74 @@
+en:
+  views:
+    repositories:
+      index:
+        badge: "Balancing active"
+        settings: "Settings"
+        sign_out: "Sign out"
+        heading: "Repositories"
+        new_repository: "New repository"
+      show:
+        back_aria: "Back to repositories"
+        pull_request_count:
+          one: "%{count} pull request"
+          other: "%{count} pull requests"
+        sign_out: "Sign out"
+        pull_requests_heading: "Pull requests"
+        empty: "There are no pull requests recorded for this repository yet."
+      table:
+        github_full_name: "GitHub full name"
+        provider: "Provider"
+        created_at: "Created at"
+        updated_at: "Updated at"
+      repository_row:
+        show_aria: "View repository"
+        delete_aria: "Delete repository"
+        delete_confirm: "Delete %{name}?"
+      form:
+        name_label: "Repository (owner/repo)"
+        name_placeholder: "acme/checkout-api"
+        webhook_secret_hint: "Used to verify GitHub webhook signatures."
+        provider_label: "Provider"
+        submit: "Create repository"
+      modal:
+        title: "New repository"
+        description: "Connect a GitHub repository to distribute its reviews."
+        close_aria: "Close"
+      error_message:
+        title: "Error!"
+      pull_requests:
+        per_page_label: "Per page"
+        column_pull_request: "Pull request"
+        column_state: "State"
+        column_reviewer: "Assigned reviewer"
+        column_matched_by: "Matched by"
+        column_review_time: "Review time"
+      pull_request:
+        unassigned: "Unassigned"
+        availability: "Availability"
+        in_progress_suffix: " (in progress)"
+        states:
+          open: "open"
+          merged: "merged"
+          closed: "closed"
+      dashboard:
+        show_charts: "View charts"
+        hide_charts: "Hide charts"
+        level_legend: "Level:"
+        levels:
+          cero: "none"
+          bajo: "low"
+          medio: "medium"
+          alto: "high"
+        pending_reviews:
+          heading: "Pending reviews by contributor"
+          description: "Current load — the same signal the balancer uses to avoid overloading anyone."
+          empty: "There are no contributors in this repo yet."
+          tooltip:
+            one: "%{login}: %{count} pending review"
+            other: "%{login}: %{count} pending reviews"
+        expertise:
+          heading: "Expertise map by technology"
+          description: "Relative level within this repo — the signal that decides who reviews each PR."
+          empty: "Not enough merged PR history yet to calculate expertise."
+          tooltip: "%{login} · %{tech}: level %{level}"

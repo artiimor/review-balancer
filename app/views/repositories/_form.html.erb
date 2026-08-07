@@ -1,7 +1,7 @@
 <%= form_for @repository, url: repositories_path, class: "space-y-5" do |f| %>
   <div>
-    <%= f.label :github_full_name, "Repositorio (owner/repo)", class: "block text-sm font-medium text-slate-700" %>
-    <%= f.text_field :github_full_name, placeholder: "acme/checkout-api",
+    <%= f.label :github_full_name, t('views.repositories.form.name_label'), class: "block text-sm font-medium text-slate-700" %>
+    <%= f.text_field :github_full_name, placeholder: t('views.repositories.form.name_placeholder'),
           class: "mt-1.5 block w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30" %>
   </div>
 
@@ -9,17 +9,17 @@
     <%= f.label :webhook_secret, class: "block text-sm font-medium text-slate-700" %>
     <%= f.password_field :webhook_secret, autocomplete: "off",
           class: "mt-1.5 block w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30" %>
-    <p class="mt-1 text-xs text-slate-400">Se usa para verificar las firmas del webhook de GitHub.</p>
+    <p class="mt-1 text-xs text-slate-400"><%= t('views.repositories.form.webhook_secret_hint') %></p>
   </div>
 
   <div>
-    <%= f.label :provider, "Proveedor", class: "block text-sm font-medium text-slate-700" %>
+    <%= f.label :provider, t('views.repositories.form.provider_label'), class: "block text-sm font-medium text-slate-700" %>
     <%= f.select :provider, options_for_select([['GitHub', 'github'], ['GitLab', 'gitlab']]), {},
           class: "mt-1.5 block w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30" %>
   </div>
 
   <div class="flex items-center justify-end gap-3 pt-2">
-    <%= f.submit "Crear repositorio",
+    <%= f.submit t('views.repositories.form.submit'),
           class: "cursor-pointer rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500" %>
   </div>
 <% end %>

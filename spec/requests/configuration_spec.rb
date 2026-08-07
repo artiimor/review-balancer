@@ -60,7 +60,7 @@ RSpec.describe 'Configuration', type: :request do
         patch configuration_path, params: { configuration: { github_access_token: 'ghp_new_token' } }
 
         expect(response).to redirect_to(configuration_path)
-        expect(flash[:notice]).to eq('Configuration updated successfully.')
+        expect(flash[:notice]).to eq('Configuración actualizada correctamente.')
         expect(user.configuration.reload.github_access_token).to eq('ghp_new_token')
       end
 
@@ -80,7 +80,7 @@ RSpec.describe 'Configuration', type: :request do
         patch configuration_path, params: { configuration: { github_access_token: 'ghp_attempted_override' } }
 
         expect(response).to redirect_to(configuration_path)
-        expect(flash[:alert]).to eq('The GitHub token is already set and cannot be changed.')
+        expect(flash[:alert]).to eq('El token de GitHub ya está configurado y no se puede cambiar.')
         expect(user.configuration.reload.github_access_token).to eq(original_token)
       end
     end
@@ -104,7 +104,7 @@ RSpec.describe 'Configuration', type: :request do
       delete destroy_github_token_path
 
       expect(response).to redirect_to(configuration_path)
-      expect(flash[:notice]).to eq('GitHub token removed.')
+      expect(flash[:notice]).to eq('Token de GitHub eliminado.')
       expect(user.configuration.reload.github_access_token).to be_nil
     end
 
@@ -123,7 +123,7 @@ RSpec.describe 'Configuration', type: :request do
       delete destroy_gitlab_token_path
 
       expect(response).to redirect_to(configuration_path)
-      expect(flash[:notice]).to eq('GitLab token removed.')
+      expect(flash[:notice]).to eq('Token de GitLab eliminado.')
       expect(user.configuration.reload.gitlab_access_token).to be_nil
     end
 

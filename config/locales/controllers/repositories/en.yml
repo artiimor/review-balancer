@@ -1,0 +1,4 @@
+en:
+  controllers:
+    repositories:
+      destroy_error: "The repository couldn't be deleted"

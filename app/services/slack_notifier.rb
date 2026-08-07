@@ -11,8 +11,8 @@ class SlackNotifier
 
     return unless reviewer.slack_user_id.present?
 
-    text = "👀 Te toca revisar la PR ##{pr.github_number} (\"#{pr.title}\") " \
-           "en #{pr.repository.github_full_name}."
+    text = I18n.t('services.slack_notifier.review_assigned',
+                   number: pr.github_number, title: pr.title, repository: pr.repository.github_full_name)
 
     connection.post do |req|
       req.body = {
