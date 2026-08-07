@@ -1,0 +1,5 @@
+<span class="ml-2">
+  <%= link_to_unless current_page.last?, t('views.pagination.next').html_safe, url, rel: 'next', remote: remote, class: "inline-flex h-8 items-center justify-center rounded-lg border border-slate-300 bg-white px-3 text-sm font-medium text-slate-600 transition hover:bg-slate-50 hover:text-slate-900" do |text| -%>
+    <span class="inline-flex h-8 items-center justify-center rounded-lg border border-slate-200 px-3 text-sm font-medium text-slate-300"><%= text %></span>
+  <% end -%>
+</span>

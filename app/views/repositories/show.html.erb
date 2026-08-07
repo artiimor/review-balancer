@@ -26,7 +26,7 @@
     </div>
 
     <% if @pull_requests.any? %>
-      <%= render partial: 'repositories/pull_requests', locals: { pull_requests: @pull_requests } %>
+      <%= render partial: 'repositories/pull_requests', locals: { pull_requests: @pull_requests, repository: @repository, per_page: @per_page } %>
     <% else %>
       <p class="px-6 py-10 text-center text-sm text-slate-500">Todavía no hay pull requests registradas para este repositorio.</p>
     <% end %>

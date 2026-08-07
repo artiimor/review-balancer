@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class RepositoriesController < ApplicationController
+  ALLOWED_PER_PAGE = [10, 20, 50, 100].freeze
+
   before_action :authenticate_user!
   before_action :ensure_github_token, except: [:destroy], if: -> { user_signed_in? }
 
@@ -42,7 +44,10 @@ class RepositoriesController < ApplicationController
 
   def show
     @repository = current_user.repositories.find(params[:id])
+    @per_page = ALLOWED_PER_PAGE.include?(params[:per].to_i) ? params[:per].to_i : 25
     @pull_requests = @repository.pull_requests.includes(review_assignments: :reviewer)
+                                .page(params[:page])
+                                .per(@per_page)
     @dashboard = RepositoryDashboardData.call(@repository)
   end
 

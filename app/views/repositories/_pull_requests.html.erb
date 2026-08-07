@@ -1,16 +1,30 @@
-<div id="pull-requests-table" class="overflow-x-auto">
-  <table class="min-w-full divide-y divide-slate-100 text-sm">
-    <thead class="bg-slate-50">
-      <tr>
-        <th class="px-6 py-3 text-left font-medium text-slate-500">Pull request</th>
-        <th class="px-6 py-3 text-left font-medium text-slate-500">Estado</th>
-        <th class="px-6 py-3 text-left font-medium text-slate-500">Revisor asignado</th>
-        <th class="px-6 py-3 text-left font-medium text-slate-500">Coincide por</th>
-        <th class="px-6 py-3 text-left font-medium text-slate-500">Tiempo de revisión</th>
-      </tr>
-    </thead>
-    <tbody id="pull_requests" class="divide-y divide-slate-100">
-      <%= render partial: 'repositories/pull_request', collection: pull_requests %>
-    </tbody>
-  </table>
-</div>
+<%= turbo_frame_tag "pull_requests" do %>
+  <div class="flex items-center justify-end gap-2 border-b border-slate-100 px-6 py-3 text-sm text-slate-500">
+    <%= form_with url: repository_path(repository), method: :get do %>
+      <label for="per" class="mr-2">Por página</label>
+      <select name="per" id="per" onchange="this.form.requestSubmit()"
+              class="rounded-lg border-slate-300 text-sm text-slate-700 focus:border-indigo-500 focus:ring-indigo-500">
+        <% RepositoriesController::ALLOWED_PER_PAGE.each do |value| %>
+          <option value="<%= value %>" <%= "selected" if value == per_page %>><%= value %></option>
+        <% end %>
+      </select>
+    <% end %>
+  </div>
+  <div id="pull-requests-table" class="overflow-x-auto">
+    <table class="min-w-full divide-y divide-slate-100 text-sm">
+      <thead class="bg-slate-50">
+        <tr>
+          <th class="px-6 py-3 text-left font-medium text-slate-500">Pull request</th>
+          <th class="px-6 py-3 text-left font-medium text-slate-500">Estado</th>
+          <th class="px-6 py-3 text-left font-medium text-slate-500">Revisor asignado</th>
+          <th class="px-6 py-3 text-left font-medium text-slate-500">Coincide por</th>
+          <th class="px-6 py-3 text-left font-medium text-slate-500">Tiempo de revisión</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-100">
+        <%= render partial: 'repositories/pull_request', collection: pull_requests %>
+      </tbody>
+    </table>
+    <%= paginate pull_requests %>
+  </div>
+<% end %>
