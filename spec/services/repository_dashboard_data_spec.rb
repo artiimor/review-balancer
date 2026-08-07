@@ -140,6 +140,25 @@ RSpec.describe RepositoryDashboardData do
       expect(levels).to all(eq('alto'))
     end
 
+    it 'does not label a contributor with a stale, heavily decayed score as alto just because most tech cells are 0' do
+      alice = create(:contributor, github_login: 'alice')
+      bob = create(:contributor, github_login: 'bob')
+      carol = create(:contributor, github_login: 'carol')
+
+      create(:file_change, pull_request: merged_pr(author: alice, days_ago: 1), contributor: alice,
+                            tech: 'Ruby', lines_changed: 200)
+      create(:file_change, pull_request: merged_pr(author: bob, days_ago: 1), contributor: bob,
+                            tech: 'JavaScript', lines_changed: 200)
+      create(:file_change, pull_request: merged_pr(author: carol, days_ago: 900), contributor: carol,
+                            tech: 'Python', lines_changed: 50)
+
+      result = described_class.call(repository)
+
+      row = result[:expertise_rows].find { |r| r[:contributor] == carol }
+      python_cell = row[:cells].find { |c| c.tech == 'Python' }
+      expect(python_cell.level).to eq('bajo')
+    end
+
     it 'labels a contributor with no expertise in a tech as bajo (score 0)' do
       contributor_with_ruby = create(:contributor, github_login: 'ruby-dev')
       contributor_without = create(:contributor, github_login: 'no-signal')

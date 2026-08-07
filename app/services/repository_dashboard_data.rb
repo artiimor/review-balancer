@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 class RepositoryDashboardData
-  # TODO pulirlo y revisarlo
   Bar = Struct.new(:contributor, :pending_reviews, keyword_init: true)
   Cell = Struct.new(:contributor, :tech, :score, :level, keyword_init: true)
 
@@ -47,7 +46,9 @@ class RepositoryDashboardData
   end
 
   def all_scores(scores_by_contributor)
-    scores_by_contributor.values.flat_map { |scores| techs.map { |tech| scores.fetch(tech, 0.0) } }
+    scores_by_contributor.values
+                         .flat_map { |scores| techs.map { |tech| scores.fetch(tech, 0.0) } }
+                         .select(&:positive?)
   end
 
   def expertise_row(contributor, scores, thresholds)
