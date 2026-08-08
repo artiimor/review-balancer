@@ -41,6 +41,33 @@ es:
           holidays_aria: "Vacaciones"
           active_true: "Activo"
           active_false: "Inactivo"
+        holidays:
+          index:
+            back_aria: "Volver a contributors"
+            heading: "Vacaciones"
+            new_holiday: "Nueva vacación"
+            holiday_count:
+              one: "%{count} vacación"
+              other: "%{count} vacaciones"
+            empty: "Todavía no hay vacaciones registradas para este contributor."
+          table:
+            start_date: "Fecha de inicio"
+            end_date: "Fecha de fin"
+            created_at: "Fecha de creación"
+          holiday_row:
+            edit_aria: "Editar vacación"
+            delete_aria: "Eliminar vacación"
+            delete_confirm: "¿Eliminar esta vacación?"
+          modal:
+            new_title: "Nueva vacación"
+            new_description: "Registra un periodo de vacaciones para este contributor."
+            edit_title: "Editar vacación"
+            edit_description: "Actualiza este periodo de vacaciones."
+            close_aria: "Cerrar"
+          form:
+            start_date_label: "Fecha de inicio"
+            end_date_label: "Fecha de fin"
+            submit: "Guardar vacación"
       repository_row:
         show_aria: "Ver repositorio"
         delete_aria: "Eliminar repositorio"

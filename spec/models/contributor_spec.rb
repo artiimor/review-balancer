@@ -41,6 +41,38 @@ RSpec.describe Contributor do
       expect(Contributor.all).to eq([active_contributor])
       expect(Contributor.unscoped.all).to include(unactive_contributor)
     end
+
+    describe '.not_in_holidays' do
+      it 'excludes a contributor currently on holiday' do
+        on_holiday = create(:contributor)
+        free = create(:contributor)
+        create(:holiday, contributor: on_holiday, start_date: 1.day.ago, end_date: 1.day.from_now)
+
+        expect(Contributor.not_in_holidays).to contain_exactly(free)
+      end
+
+      it 'includes a contributor whose holiday has already ended' do
+        contributor = create(:contributor)
+        create(:holiday, contributor: contributor, start_date: 10.days.ago, end_date: 5.days.ago)
+
+        expect(Contributor.not_in_holidays).to include(contributor)
+      end
+
+      it 'includes a contributor whose holiday has not started yet' do
+        contributor = create(:contributor)
+        create(:holiday, contributor: contributor, start_date: 5.days.from_now, end_date: 10.days.from_now)
+
+        expect(Contributor.not_in_holidays).to include(contributor)
+      end
+
+      it 'excludes a contributor with several holidays when at least one of them is current' do
+        contributor = create(:contributor)
+        create(:holiday, contributor: contributor, start_date: 10.days.ago, end_date: 5.days.ago)
+        create(:holiday, contributor: contributor, start_date: 1.day.ago, end_date: 1.day.from_now)
+
+        expect(Contributor.not_in_holidays).not_to include(contributor)
+      end
+    end
   end
 
   describe '#current_review_load' do

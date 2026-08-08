@@ -2,7 +2,7 @@
 
 class ReviewerSelector
   def self.candidates_for(pull_request)
-    pull_request.repository.contributors.where.not(id: pull_request.author_id)
+    pull_request.repository.contributors.not_in_holidays.where.not(id: pull_request.author_id)
   end
 
   def self.rank(pull_request, top_n: 3)

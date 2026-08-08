@@ -32,13 +32,14 @@
         </svg>
       <% end %>
 
-      <button type="button"
-              class="rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-indigo-600"
-              aria-label="<%= t('views.repositories.contributors.contributor_row.holidays_aria') %>">
+      <%= link_to repository_contributor_holidays_path(@repository, contributor),
+            class: 'rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-indigo-600',
+            data: { turbo_frame: '_top' },
+            aria: { label: t('views.repositories.contributors.contributor_row.holidays_aria') } do %>
         <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
           <path d="M6 2a1 1 0 0 1 1 1v1h6V3a1 1 0 1 1 2 0v1h.5A2.5 2.5 0 0 1 18 6.5v9A2.5 2.5 0 0 1 15.5 18h-11A2.5 2.5 0 0 1 2 15.5v-9A2.5 2.5 0 0 1 4.5 4H5V3a1 1 0 0 1 1-1Zm-2 6.5v7c0 .276.224.5.5.5h11a.5.5 0 0 0 .5-.5v-7H4Z" />
         </svg>
-      </button>
+      <% end %>
     </div>
   </td>
 </tr>

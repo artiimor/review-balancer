@@ -14,6 +14,7 @@ class Contributor < ApplicationRecord
   validates :github_login, presence: true, uniqueness: true
 
   default_scope { where(active: true) }
+  scope :not_in_holidays, -> { where.not(id: Holiday.current.select(:contributor_id)) }
 
   def current_review_load
     review_assignments.where(completed_at: nil).count

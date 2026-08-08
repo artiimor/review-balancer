@@ -41,6 +41,33 @@ en:
           holidays_aria: "Holidays"
           active_true: "Active"
           active_false: "Inactive"
+        holidays:
+          index:
+            back_aria: "Back to contributors"
+            heading: "Holidays"
+            new_holiday: "New holiday"
+            holiday_count:
+              one: "%{count} holiday"
+              other: "%{count} holidays"
+            empty: "There are no holidays recorded for this contributor yet."
+          table:
+            start_date: "Start date"
+            end_date: "End date"
+            created_at: "Created at"
+          holiday_row:
+            edit_aria: "Edit holiday"
+            delete_aria: "Delete holiday"
+            delete_confirm: "Delete this holiday?"
+          modal:
+            new_title: "New holiday"
+            new_description: "Record a time-off period for this contributor."
+            edit_title: "Edit holiday"
+            edit_description: "Update this time-off period."
+            close_aria: "Close"
+          form:
+            start_date_label: "Start date"
+            end_date_label: "End date"
+            submit: "Save holiday"
       repository_row:
         show_aria: "View repository"
         delete_aria: "Delete repository"

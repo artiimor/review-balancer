@@ -103,7 +103,36 @@ RSpec.describe ReviewerSelector do
     expect(assignment.matched_tech).to be_nil
   end
 
-  it 'assign! devuelve nil si no hay candidatos disponibles (el autor es el único contributor del repo)' do
+  it 'no elige como candidato a quien está de vacaciones ahora mismo' do
+    create(:holiday, contributor: experta_ruby, start_date: 1.day.ago, end_date: 1.day.from_now)
+    pr = open_pr_touching('Ruby')
+
+    candidates = described_class.candidates_for(pr)
+
+    expect(candidates).not_to include(experta_ruby)
+  end
+
+  it 'sigue considerando candidato a quien tiene unas vacaciones pasadas o futuras' do
+    create(:holiday, contributor: experta_ruby, start_date: 10.days.ago, end_date: 5.days.ago)
+    create(:holiday, contributor: experta_ruby, start_date: 5.days.from_now, end_date: 10.days.from_now)
+    pr = open_pr_touching('Ruby')
+
+    candidates = described_class.candidates_for(pr)
+
+    expect(candidates).to include(experta_ruby)
+  end
+
+  it 'assign! does not assign a contributor who is in vacation' do
+    create(:holiday, contributor: experta_ruby, start_date: 1.day.ago, end_date: 1.day.from_now)
+    create(:holiday, contributor: experta_saturada, start_date: 1.day.ago, end_date: 1.day.from_now)
+    pr = open_pr_touching('Ruby')
+
+    assignment = described_class.assign!(pr)
+
+    expect(assignment.reviewer).to eq(novato)
+  end
+
+  it 'assign! returns nil if there is no candidates' do
     solo_repo = Repository.create!(github_full_name: 'arturo/solo-repo', webhook_secret: 's3cr3t', user: user)
     pr = PullRequest.create!(
       repository: solo_repo, author: author, github_number: rand(1..999_999),

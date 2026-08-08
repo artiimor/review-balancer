@@ -1,0 +1,35 @@
+<div class="mx-auto max-w-5xl">
+  <div class="mb-6 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <%= link_to repository_contributors_path(@repository),
+            class: "rounded-lg p-2 text-slate-400 transition hover:bg-white hover:text-slate-600",
+            "aria-label": t('views.repositories.contributors.holidays.index.back_aria') do %>
+        <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M9.707 14.707a1 1 0 0 1-1.414 0l-4-4a1 1 0 0 1 0-1.414l4-4a1 1 0 1 1 1.414 1.414L7.414 9H16a1 1 0 1 1 0 2H7.414l2.293 2.293a1 1 0 0 1 0 1.414Z" clip-rule="evenodd" />
+        </svg>
+      <% end %>
+      <div>
+        <h1 class="text-lg font-semibold tracking-tight text-slate-900"><%= @contributor.name.presence || @contributor.github_login %></h1>
+        <%= render partial: 'repositories/holidays/holidays/count', locals: { holidays: @holidays } %>
+      </div>
+    </div>
+  </div>
+
+  <div class="overflow-hidden rounded-2xl bg-white shadow-xl ring-1 ring-slate-900/5">
+    <div class="flex items-center justify-between border-b border-slate-100 px-6 py-5">
+      <h2 class="text-base font-semibold text-slate-900"><%= t('views.repositories.contributors.holidays.index.heading') %></h2>
+
+      <%= link_to new_repository_contributor_holiday_path(@repository, @contributor), data: { turbo_frame: "holiday-modal" },
+            class: "inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3.5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500" do %>
+        <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+          <path d="M10 4a1 1 0 0 1 1 1v4h4a1 1 0 1 1 0 2h-4v4a1 1 0 1 1-2 0v-4H5a1 1 0 1 1 0-2h4V5a1 1 0 0 1 1-1Z" />
+        </svg>
+        <%= t('views.repositories.contributors.holidays.index.new_holiday') %>
+      <% end %>
+    </div>
+
+    <%= render partial: 'repositories/holidays/holidays/table', locals: { holidays: @holidays } %>
+
+    <%= turbo_frame_tag "holiday-modal" %>
+  </div>
+</div>

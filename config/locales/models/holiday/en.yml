@@ -1,0 +1,4 @@
+en:
+  models:
+    holiday:
+      date_error: 'Start date must be before end date'

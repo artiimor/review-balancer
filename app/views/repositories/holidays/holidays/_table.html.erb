@@ -1,0 +1,19 @@
+<div id="holiday-table" class="overflow-x-auto">
+  <table class="min-w-full divide-y divide-slate-100 text-sm">
+    <thead class="bg-slate-50">
+      <tr>
+        <th class="px-6 py-3 text-left font-medium text-slate-500"><%= t('views.repositories.contributors.holidays.table.start_date') %></th>
+        <th class="px-6 py-3 text-left font-medium text-slate-500"><%= t('views.repositories.contributors.holidays.table.end_date') %></th>
+        <th class="px-6 py-3 text-left font-medium text-slate-500"><%= t('views.repositories.contributors.holidays.table.created_at') %></th>
+        <th class="px-6 py-3 text-left font-medium text-slate-500"></th>
+      </tr>
+    </thead>
+    <tbody id="holidays" class="divide-y divide-slate-100">
+      <% if holidays.any? %>
+        <%= render partial: 'repositories/holidays/holidays/holiday', collection: holidays %>
+      <% else %>
+        <%= render partial: 'repositories/holidays/holidays/empty_state' %>
+      <% end %>
+    </tbody>
+  </table>
+</div>

@@ -1,0 +1,4 @@
+es:
+  models:
+    holiday:
+      date_error: 'La fecha de inicio tiene que ser anterior a la fecha de fin'

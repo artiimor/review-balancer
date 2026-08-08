@@ -1,0 +1,19 @@
+<% form_url = holiday.persisted? ? repository_contributor_holiday_path(@repository, @contributor, holiday) : repository_contributor_holidays_path(@repository, @contributor) %>
+<%= form_for holiday, url: form_url, class: "space-y-5" do |f| %>
+  <div>
+    <%= f.label :start_date, t('views.repositories.contributors.holidays.form.start_date_label'), class: "block text-sm font-medium text-slate-700" %>
+    <%= f.date_field :start_date,
+          class: "mt-1.5 block w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30" %>
+  </div>
+
+  <div>
+    <%= f.label :end_date, t('views.repositories.contributors.holidays.form.end_date_label'), class: "block text-sm font-medium text-slate-700" %>
+    <%= f.date_field :end_date,
+          class: "mt-1.5 block w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30" %>
+  </div>
+
+  <div class="flex items-center justify-end gap-3 pt-2">
+    <%= f.submit t('views.repositories.contributors.holidays.form.submit'),
+          class: "cursor-pointer rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500" %>
+  </div>
+<% end %>
