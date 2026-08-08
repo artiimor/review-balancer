@@ -14,8 +14,13 @@
       </div>
     </div>
 
-    <%= button_to t('views.repositories.show.sign_out'), destroy_user_session_path, method: :delete,
-          class: "cursor-pointer rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50" %>
+    <div class="flex items-center gap-3">
+      <%= link_to t('views.repositories.show.contributors_link'), repository_contributors_path(@repository),
+            class: "inline-flex items-center rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50" %>
+
+      <%= button_to t('views.repositories.show.sign_out'), destroy_user_session_path, method: :delete,
+            class: "cursor-pointer rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50" %>
+    </div>
   </div>
 
   <%= render partial: 'repositories/dashboard', locals: { dashboard: @dashboard } %>

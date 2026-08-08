@@ -13,6 +13,7 @@ es:
           one: "%{count} pull request"
           other: "%{count} pull requests"
         sign_out: "Cerrar sesión"
+        contributors_link: "Contributors"
         pull_requests_heading: "Pull requests"
         empty: "Todavía no hay pull requests registradas para este repositorio."
       table:
@@ -20,6 +21,26 @@ es:
         provider: "Proveedor"
         created_at: "Fecha de creación"
         updated_at: "Última actualización"
+      contributors:
+        index:
+          back_aria: "Volver al repositorio"
+          heading: "Contributors"
+          contributor_count:
+            one: "%{count} contributor"
+            other: "%{count} contributors"
+          empty: "Todavía no hay contributors registrados para este repositorio."
+        table:
+          github_login: "Usuario de gitHub"
+          gitlab_login: "Usuario de gitLab"
+          name: "Nombre"
+          active: "Activo"
+          pending_reviews: "Revisiones pendientes"
+          created_at: "Fecha de creación"
+        contributor_row:
+          toggle_active_aria: "Activar/desactivar contributor"
+          holidays_aria: "Vacaciones"
+          active_true: "Activo"
+          active_false: "Inactivo"
       repository_row:
         show_aria: "Ver repositorio"
         delete_aria: "Eliminar repositorio"

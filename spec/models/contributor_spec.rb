@@ -8,11 +8,14 @@ RSpec.describe Contributor do
       is_expected.to have_many(:authored_pull_requests)
         .class_name('PullRequest')
         .with_foreign_key('author_id')
-        .dependent(:restrict_with_error) }
+        .dependent(:restrict_with_error)
+    }
     it { is_expected.to have_many(:review_assignments).with_foreign_key('reviewer_id').dependent(:destroy) }
     it { is_expected.to have_many(:file_changes).dependent(:destroy) }
     it { is_expected.to have_many(:repository_contributors).dependent(:destroy) }
     it { is_expected.to have_many(:repositories).through(:repository_contributors) }
+    it { is_expected.to have_many(:holidays) }
+
     it 'prevents destroying a contributor that authored a pull_request' do
       contributor = create(:contributor)
       create(:pull_request, author: contributor)
@@ -28,6 +31,16 @@ RSpec.describe Contributor do
 
     it { is_expected.to validate_presence_of(:github_login) }
     it { is_expected.to validate_uniqueness_of(:github_login) }
+  end
+
+  describe 'scopes' do
+    it 'shows by default active contributors' do
+      active_contributor = create(:contributor)
+      unactive_contributor = create(:contributor, active: false)
+
+      expect(Contributor.all).to eq([active_contributor])
+      expect(Contributor.unscoped.all).to include(unactive_contributor)
+    end
   end
 
   describe '#current_review_load' do

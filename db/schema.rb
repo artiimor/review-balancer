@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_08_07_173939) do
+ActiveRecord::Schema[7.2].define(version: 2026_08_08_114015) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -29,6 +29,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_08_07_173939) do
     t.string "name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "active", default: true
     t.index ["github_login"], name: "index_contributors_on_github_login", unique: true
   end
 
@@ -51,6 +52,15 @@ ActiveRecord::Schema[7.2].define(version: 2026_08_07_173939) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["extension"], name: "index_file_extension_mappings_on_extension", unique: true
+  end
+
+  create_table "holidays", force: :cascade do |t|
+    t.datetime "start_date", null: false
+    t.datetime "end_date", null: false
+    t.bigint "contributor_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["contributor_id"], name: "index_holidays_on_contributor_id"
   end
 
   create_table "pull_requests", force: :cascade do |t|
