@@ -7,7 +7,7 @@ class RepositoriesController < ApplicationController
   before_action :ensure_github_token, except: [:destroy], if: -> { user_signed_in? }
 
   def index
-    @repositories = current_user.repositories
+    @repositories = current_user.repositories.order(created_at: :asc)
   end
 
   def new
