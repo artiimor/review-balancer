@@ -132,6 +132,16 @@ RSpec.describe ReviewerSelector do
     expect(assignment.reviewer).to eq(novato)
   end
 
+  it 'assign! does not assign a contributor who is deactivated' do
+    experta_ruby.update!(active: false)
+    experta_saturada.update!(active: false)
+    pr = open_pr_touching('Ruby')
+
+    assignment = described_class.assign!(pr)
+
+    expect(assignment.reviewer).to eq(novato)
+  end
+
   it 'assign! returns nil if there is no candidates' do
     solo_repo = Repository.create!(github_full_name: 'arturo/solo-repo', webhook_secret: 's3cr3t', user: user)
     pr = PullRequest.create!(
