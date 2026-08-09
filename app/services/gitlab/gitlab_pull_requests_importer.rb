@@ -4,8 +4,8 @@ module Gitlab
   class GitlabPullRequestsImporter
     LOOKBACK = 1.year
 
-    def self.call(repository, gitlab_access_token)
-      new(repository, gitlab_access_token).call
+    def self.call(repository, gitlab_access_token, lookback: LOOKBACK)
+      new(repository, gitlab_access_token, lookback: lookback).call
     end
 
     def initialize(repository, gitlab_access_token, lookback: LOOKBACK)

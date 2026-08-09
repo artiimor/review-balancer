@@ -79,6 +79,17 @@ RSpec.describe Github::GithubPullRequestsImporter do
       described_class.call(repository, github_access_token)
     end
 
+    it 'stops once it reaches a pull request older than the given lookback' do
+      recent = github_pr(number: 1, created_at: 100.days.ago, merged_at: 100.days.ago)
+      old = github_pr(number: 2, created_at: 200.days.ago, merged_at: 200.days.ago)
+      stub_pull_requests(recent, old)
+      allow_any_instance_of(Octokit::Client).to receive(:pull_request_files).and_return([])
+
+      described_class.call(repository, github_access_token, lookback: 6.months)
+
+      expect(PullRequest.where(repository: repository).pluck(:github_number)).to contain_exactly(1)
+    end
+
     it 'paginates through multiple pages of closed pull requests' do
       next_link = double(href: 'https://api.github.com/repositories/1/pulls?page=2')
       page1 = [github_pr(number: 1)]

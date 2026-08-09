@@ -99,6 +99,29 @@ RSpec.describe 'Configuration', type: :request do
     end
   end
 
+  describe '#update lookback_months' do
+    it 'updates the lookback period and redirects with a notice' do
+      patch configuration_path, params: { configuration: { lookback_months: 6 } }
+
+      expect(response).to redirect_to(configuration_path)
+      expect(flash[:notice]).to eq('Configuración actualizada correctamente.')
+      expect(user.configuration.reload.lookback_months).to eq(6)
+    end
+
+    it 're-renders the form when the value is out of range' do
+      patch configuration_path, params: { configuration: { lookback_months: 49 } }
+
+      expect(response).to have_http_status(:unprocessable_entity)
+      expect(user.configuration.reload.lookback_months).not_to eq(49)
+    end
+
+    it 're-renders the form when the value is blank' do
+      patch configuration_path, params: { configuration: { lookback_months: '' } }
+
+      expect(response).to have_http_status(:unprocessable_entity)
+    end
+  end
+
   describe '#destroy_github_token' do
     it 'clears the token and redirects with a notice' do
       delete destroy_github_token_path

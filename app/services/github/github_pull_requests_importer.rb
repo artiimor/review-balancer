@@ -4,8 +4,8 @@ module Github
   class GithubPullRequestsImporter
     LOOKBACK = 1.year
 
-    def self.call(repository, github_access_token)
-      new(repository, github_access_token).call
+    def self.call(repository, github_access_token, lookback: LOOKBACK)
+      new(repository, github_access_token, lookback: lookback).call
     end
 
     def initialize(repository, github_access_token, lookback: LOOKBACK)

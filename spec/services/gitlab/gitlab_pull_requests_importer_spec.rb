@@ -93,6 +93,17 @@ RSpec.describe Gitlab::GitlabPullRequestsImporter do
       expect(PullRequest.where(repository: repository).pluck(:github_number)).to contain_exactly(1, 2)
     end
 
+    it 'stops once it reaches a merge request older than the given lookback' do
+      recent = gitlab_mr(iid: 1, created_at: 100.days.ago, merged_at: 100.days.ago)
+      old = gitlab_mr(iid: 2, created_at: 200.days.ago, merged_at: 200.days.ago)
+      stub_merge_requests([recent, old])
+      allow_any_instance_of(Gitlab::Client).to receive(:merge_request_changes).and_return(double(changes: []))
+
+      described_class.call(repository, gitlab_access_token, lookback: 6.months)
+
+      expect(PullRequest.where(repository: repository).pluck(:github_number)).to contain_exactly(1)
+    end
+
     it "uses the repository owner's configured GitLab URL when building the client" do
       repository.user.configuration.update!(gitlab_url: 'https://gitlab.example.com')
       client = instance_double(Gitlab::Client, merge_requests: [])

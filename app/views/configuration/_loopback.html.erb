@@ -1,0 +1,22 @@
+<div class="overflow-hidden rounded-2xl bg-white shadow-xl ring-1 ring-slate-900/5">
+  <div class="border-b border-slate-100 px-6 py-5">
+    <h2 class="text-base font-semibold text-slate-900"><%= t('views.configuration.lookback.heading') %></h2>
+    <p class="mt-1 text-sm text-slate-500"><%= t('views.configuration.lookback.description') %></p>
+  </div>
+
+  <div class="px-6 py-6">
+    <%= form_for @configuration, url: configuration_path, method: :patch, class: "space-y-5" do |f| %>
+      <div>
+        <%= f.label :lookback_months, t('views.configuration.lookback.label'), class: "block text-sm font-medium text-slate-700" %>
+        <%= f.number_field :lookback_months, min: 1, max: 48, autocomplete: "off",
+              class: "mt-1.5 block w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30" %>
+        <p class="mt-1 text-xs text-slate-400"><%= t('views.configuration.lookback.hint') %></p>
+      </div>
+
+      <div class="flex items-center justify-end gap-3 pt-2">
+        <%= f.submit t('views.configuration.lookback.submit'),
+              class: "cursor-pointer rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500" %>
+      </div>
+    <% end %>
+  </div>
+</div>

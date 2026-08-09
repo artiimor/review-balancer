@@ -30,3 +30,9 @@ en:
         token_placeholder: "glpat-xxxxxxxxxxxxxxxxxxxx"
         token_hint_html: "Generate a token on GitLab with the <code>api</code> scope and paste it here. You won't be able to change it after saving."
         submit: "Save"
+      lookback:
+        heading: "Analysis period"
+        description: "Number of months to look back when importing and analyzing pull requests."
+        label: "Months to look back"
+        hint: "Must be between 1 and 48 months."
+        submit: "Save"

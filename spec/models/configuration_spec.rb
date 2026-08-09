@@ -1,6 +1,12 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 RSpec.describe Configuration, type: :model do
+  describe 'validations' do
+    it { should validate_inclusion_of(:lookback_months).in_range(1..48) }
+  end
+
   describe 'associations' do
     it { is_expected.to belong_to(:user) }
   end
@@ -12,7 +18,8 @@ RSpec.describe Configuration, type: :model do
       configuration = create(:configuration, user: user, github_access_token: 'super-secreto')
 
       raw_value = ActiveRecord::Base.connection.select_value(
-        ActiveRecord::Base.sanitize_sql(['SELECT github_access_token FROM configurations WHERE id = ?', configuration.id])
+        ActiveRecord::Base.sanitize_sql(['SELECT github_access_token FROM configurations WHERE id = ?',
+                                         configuration.id])
       )
 
       expect(raw_value).not_to eq('super-secreto')
@@ -27,7 +34,8 @@ RSpec.describe Configuration, type: :model do
       configuration = create(:configuration, user: user, gitlab_access_token: 'super-secreto')
 
       raw_value = ActiveRecord::Base.connection.select_value(
-        ActiveRecord::Base.sanitize_sql(['SELECT gitlab_access_token FROM configurations WHERE id = ?', configuration.id])
+        ActiveRecord::Base.sanitize_sql(['SELECT gitlab_access_token FROM configurations WHERE id = ?',
+                                         configuration.id])
       )
 
       expect(raw_value).not_to eq('super-secreto')
