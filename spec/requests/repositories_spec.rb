@@ -52,7 +52,9 @@ RSpec.describe 'Repositories', type: :request do
   end
 
   describe '#create' do
-    let(:valid_params) { { repository: { github_full_name: 'acme/new-repo', webhook_secret: 's3cr3t', provider: 'github' } } }
+    let(:valid_params) do
+      { repository: { github_full_name: 'acme/new-repo', webhook_secret: 's3cr3t', provider: 'github' } }
+    end
     let(:invalid_params) { { repository: { github_full_name: '', webhook_secret: 's3cr3t', provider: 'github' } } }
 
     context 'with valid params' do
@@ -112,7 +114,7 @@ RSpec.describe 'Repositories', type: :request do
 
         expect(response).to have_http_status(:ok)
         expect(response.body).to include('action="replace"', 'target="new-repository-modal"')
-        expect(response.body).to include("can&#39;t be blank")
+        expect(response.body).to include('can&#39;t be blank')
       end
     end
 
@@ -183,7 +185,7 @@ RSpec.describe 'Repositories', type: :request do
       repository = user.repositories.create!(github_full_name: 'acme/checkout-api', webhook_secret: 's3cr3t')
       contributor = create(:contributor, github_login: 'alice')
       pull_request = create(:pull_request, repository: repository, author: contributor,
-                                            title: 'Fix bug', github_number: 42)
+                                           title: 'Fix bug', github_number: 42)
       create(:review_assignment, pull_request: pull_request, reviewer: contributor)
 
       get repository_path(repository)
@@ -230,6 +232,120 @@ RSpec.describe 'Repositories', type: :request do
         get repository_path(repository)
         expect(response).to redirect_to(configuration_path)
         expect(flash[:alert]).to eq(I18n.t('controllers.application.github_token_required'))
+      end
+    end
+
+    context 'with filters' do
+      let(:repository) { user.repositories.create!(github_full_name: 'acme/checkout-api', webhook_secret: 's3cr3t') }
+      let(:alice) { create(:contributor, github_login: 'alice') }
+      let(:bob) { create(:contributor, github_login: 'bob') }
+
+      let!(:matching_pull_request) do
+        create(:pull_request, repository: repository, author: bob, title: 'Fix login bug', github_number: 42,
+                              state: 'open')
+      end
+      let!(:other_pull_request) do
+        create(:pull_request, repository: repository, author: alice, title: 'Add dashboard', github_number: 7,
+                              state: 'merged')
+      end
+      let!(:third_pull_request) do
+        create(:pull_request, repository: repository, author: alice, title: 'Fix signup bug', github_number: 99,
+                              state: 'open')
+      end
+
+      before do
+        create(:review_assignment, pull_request: matching_pull_request, reviewer: alice,
+                                   assigned_at: 2.hours.ago)
+        create(:review_assignment, pull_request: other_pull_request, reviewer: bob,
+                                   assigned_at: 5.days.ago, completed_at: 1.day.ago)
+        create(:review_assignment, pull_request: third_pull_request, reviewer: alice,
+                                   assigned_at: 3.hours.ago)
+      end
+
+      it 'filters by title or PR number' do
+        get repository_path(repository, q: 'login')
+
+        expect(response.body).to include('Fix login bug')
+        expect(response.body).not_to include('Add dashboard')
+        expect(response.body).not_to include('Fix signup bug')
+      end
+
+      it 'filters by PR number' do
+        get repository_path(repository, q: '#7')
+
+        expect(response.body).to include('Add dashboard')
+        expect(response.body).not_to include('Fix login bug')
+        expect(response.body).not_to include('Fix signup bug')
+      end
+
+      it 'filters by state' do
+        get repository_path(repository, state: 'merged')
+
+        expect(response.body).to include('Add dashboard')
+        expect(response.body).not_to include('Fix login bug')
+        expect(response.body).not_to include('Fix signup bug')
+      end
+
+      it 'filters by reviewer' do
+        get repository_path(repository, reviewer_id: bob.id)
+
+        expect(response.body).to include('Add dashboard')
+        expect(response.body).not_to include('Fix login bug')
+        expect(response.body).not_to include('Fix signup bug')
+      end
+
+      it 'filters by review time bucket' do
+        get repository_path(repository, review_time: 'over_3_days')
+
+        expect(response.body).to include('Add dashboard')
+        expect(response.body).not_to include('Fix login bug')
+        expect(response.body).not_to include('Fix signup bug')
+      end
+
+      it 'returns every matching PR when more than one satisfies the query' do
+        get repository_path(repository, q: 'bug')
+
+        expect(response.body).to include('Fix login bug', 'Fix signup bug')
+        expect(response.body).not_to include('Add dashboard')
+      end
+
+      it 'returns every matching PR when more than one satisfies the state filter' do
+        get repository_path(repository, state: 'open')
+
+        expect(response.body).to include('Fix login bug', 'Fix signup bug')
+        expect(response.body).not_to include('Add dashboard')
+      end
+
+      it 'returns every matching PR when more than one satisfies the reviewer filter' do
+        get repository_path(repository, reviewer_id: alice.id)
+
+        expect(response.body).to include('Fix login bug', 'Fix signup bug')
+        expect(response.body).not_to include('Add dashboard')
+      end
+
+      it 'returns every matching PR when more than one satisfies the review time filter' do
+        get repository_path(repository, review_time: 'under_1_day')
+
+        expect(response.body).to include('Fix login bug', 'Fix signup bug')
+        expect(response.body).not_to include('Add dashboard')
+      end
+
+      it 'shows a filter-specific empty state when nothing matches' do
+        get repository_path(repository, q: 'nonexistent-pr-title')
+
+        expect(response.body).to include('No hay pull requests que coincidan con los filtros.')
+      end
+
+      it 'selecting several states returns the union of all of them' do
+        get repository_path(repository, state: %w[merged open])
+
+        expect(response.body).to include('Fix login bug', 'Fix signup bug', 'Add dashboard')
+      end
+
+      it 'selecting several reviewers returns the union of all of them' do
+        get repository_path(repository, reviewer_id: [alice.id, bob.id])
+
+        expect(response.body).to include('Fix login bug', 'Fix signup bug', 'Add dashboard')
       end
     end
   end

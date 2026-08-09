@@ -91,6 +91,18 @@ es:
         column_reviewer: "Revisor asignado"
         column_matched_by: "Coincide por"
         column_review_time: "Tiempo de revisión"
+        search:
+          heading: "Buscar"
+          hide: "Ocultar filtros"
+          query_label: "Nombre o número"
+          query_placeholder: "Nombre o número de PR"
+          review_time_all: "Todas"
+          review_time_under_1_day: "Menos de 1 día"
+          review_time_1_to_3_days: "1 a 3 días"
+          review_time_over_3_days: "Más de 3 días"
+          submit: "Buscar"
+          clear: "Eliminar filtros"
+          empty: "No hay pull requests que coincidan con los filtros."
       pull_request:
         unassigned: "Sin asignar"
         availability: "Disponibilidad"

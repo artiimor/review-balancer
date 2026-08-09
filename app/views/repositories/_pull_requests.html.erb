@@ -1,13 +1,81 @@
 <%= turbo_frame_tag "pull_requests" do %>
-  <div class="flex items-center justify-end gap-2 border-b border-slate-100 px-6 py-3 text-sm text-slate-500">
-    <%= form_with url: repository_path(repository), method: :get do %>
-      <label for="per" class="mr-2"><%= t('views.repositories.pull_requests.per_page_label') %></label>
-      <select name="per" id="per" onchange="this.form.requestSubmit()"
-              class="rounded-lg border-slate-300 text-sm text-slate-700 focus:border-indigo-500 focus:ring-indigo-500">
-        <% RepositoriesController::ALLOWED_PER_PAGE.each do |value| %>
-          <option value="<%= value %>" <%= "selected" if value == per_page %>><%= value %></option>
-        <% end %>
-      </select>
+  <div class="border-b border-slate-100 px-6 py-4" data-controller="disclosure">
+    <button type="button" data-action="disclosure#toggle" data-disclosure-target="label"
+            data-show-text="<%= t('views.repositories.pull_requests.search.heading') %>" data-hide-text="<%= t('views.repositories.pull_requests.search.hide') %>"
+            aria-expanded="<%= filters_active ? 'true' : 'false' %>"
+            class="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3.5 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50">
+      <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M2.628 1.601C5.028 1.206 7.49 1 10 1s4.973.206 7.372.601a.75.75 0 0 1 .628.74v2.288a2.25 2.25 0 0 1-.659 1.59l-4.682 4.683a2.25 2.25 0 0 0-.659 1.59v3.037c0 .684-.31 1.33-.844 1.757l-1.937 1.55A.75.75 0 0 1 8 18.25v-5.757a2.25 2.25 0 0 0-.659-1.591L2.659 6.22A2.25 2.25 0 0 1 2 4.629V2.34a.75.75 0 0 1 .628-.74Z" clip-rule="evenodd" />
+      </svg>
+      <span data-disclosure-target="label"><%= filters_active ? t('views.repositories.pull_requests.search.hide') : t('views.repositories.pull_requests.search.heading') %></span>
+    </button>
+
+    <%= form_with url: repository_path(repository), method: :get,
+          class: "text-sm text-slate-500" do %>
+      <div class="<%= 'hidden' unless filters_active %> mt-4 flex flex-col gap-4" data-disclosure-target="panel">
+        <div class="flex flex-col gap-1">
+          <span class="text-xs font-medium text-slate-500"><%= t('views.repositories.pull_requests.column_state') %></span>
+          <div class="flex flex-wrap items-center gap-1.5 py-0.5">
+            <% %w[open merged closed].each do |state| %>
+              <label class="cursor-pointer select-none rounded-full px-2.5 py-1 text-xs font-medium ring-1 opacity-50 ring-transparent transition <%= pull_request_state_badge_classes(state) %> hover:opacity-100 has-[:checked]:opacity-100 has-[:checked]:ring-current">
+                <input type="checkbox" name="state[]" value="<%= state %>" <%= 'checked' if filters[:state].include?(state) %> class="sr-only" />
+                <%= t("views.repositories.pull_request.states.#{state}") %>
+              </label>
+            <% end %>
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-1">
+          <span class="text-xs font-medium text-slate-500"><%= t('views.repositories.pull_requests.column_reviewer') %></span>
+          <div class="flex flex-wrap items-center gap-1.5 py-0.5">
+            <% reviewers.each do |reviewer| %>
+              <label class="cursor-pointer select-none rounded-full px-2.5 py-1 text-xs font-medium ring-1 bg-white text-slate-500 ring-slate-300 transition hover:bg-slate-50 has-[:checked]:bg-indigo-600 has-[:checked]:text-white has-[:checked]:ring-indigo-600">
+                <input type="checkbox" name="reviewer_id[]" value="<%= reviewer.id %>" <%= 'checked' if filters[:reviewer_id].include?(reviewer.id.to_s) %> class="sr-only" />
+                <%= reviewer.github_login %>
+              </label>
+            <% end %>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap items-end gap-3">
+          <div class="flex flex-col gap-1">
+            <label for="q" class="text-xs font-medium text-slate-500"><%= t('views.repositories.pull_requests.search.query_label') %></label>
+            <input type="text" name="q" id="q" value="<%= filters[:q] %>"
+                   placeholder="<%= t('views.repositories.pull_requests.search.query_placeholder') %>"
+                   class="rounded-lg border-slate-300 text-sm text-slate-700 focus:border-indigo-500 focus:ring-indigo-500" />
+          </div>
+
+          <div class="flex flex-col gap-1">
+            <label for="review_time" class="text-xs font-medium text-slate-500"><%= t('views.repositories.pull_requests.column_review_time') %></label>
+            <select name="review_time" id="review_time"
+                    class="rounded-lg border-slate-300 text-sm text-slate-700 focus:border-indigo-500 focus:ring-indigo-500">
+              <option value=""><%= t('views.repositories.pull_requests.search.review_time_all') %></option>
+              <% PullRequest::REVIEW_TIME_BUCKETS.each_key do |bucket| %>
+                <option value="<%= bucket %>" <%= "selected" if filters[:review_time] == bucket %>><%= t("views.repositories.pull_requests.search.review_time_#{bucket}") %></option>
+              <% end %>
+            </select>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <button type="submit"
+                    class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-indigo-500">
+              <%= t('views.repositories.pull_requests.search.submit') %>
+            </button>
+            <%= link_to t('views.repositories.pull_requests.search.clear'), repository_path(repository, per: per_page),
+                  class: "rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50" %>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-4 flex items-center gap-2">
+        <label for="per" class="text-xs font-medium text-slate-500"><%= t('views.repositories.pull_requests.per_page_label') %></label>
+        <select name="per" id="per" onchange="this.form.requestSubmit()"
+                class="rounded-lg border-slate-300 text-sm text-slate-700 focus:border-indigo-500 focus:ring-indigo-500">
+          <% RepositoriesController::ALLOWED_PER_PAGE.each do |value| %>
+            <option value="<%= value %>" <%= "selected" if value == per_page %>><%= value %></option>
+          <% end %>
+        </select>
+      </div>
     <% end %>
   </div>
   <div id="pull-requests-table" class="overflow-x-auto">
@@ -22,7 +90,15 @@
         </tr>
       </thead>
       <tbody class="divide-y divide-slate-100">
-        <%= render partial: 'repositories/pull_request', collection: pull_requests %>
+        <% if pull_requests.any? %>
+          <%= render partial: 'repositories/pull_request', collection: pull_requests %>
+        <% else %>
+          <tr>
+            <td colspan="5" class="px-6 py-10 text-center text-sm text-slate-500">
+              <%= filters_active ? t('views.repositories.pull_requests.search.empty') : t('views.repositories.show.empty') %>
+            </td>
+          </tr>
+        <% end %>
       </tbody>
     </table>
     <%= paginate pull_requests %>

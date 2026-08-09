@@ -45,13 +45,36 @@ class RepositoriesController < ApplicationController
   def show
     @repository = current_user.repositories.find(params[:id])
     @per_page = ALLOWED_PER_PAGE.include?(params[:per].to_i) ? params[:per].to_i : 25
-    @pull_requests = @repository.pull_requests.includes(review_assignments: :reviewer)
-                                .page(params[:page])
-                                .per(@per_page)
+    @reviewers = @repository.contributors.order(:github_login)
+    load_pull_requests
     @dashboard = RepositoryDashboardData.call(@repository)
   end
 
   private
+
+  def load_pull_requests
+    @filters = pull_request_filters
+    @filters_active = @filters.values.any?(&:present?)
+    @pull_requests = paginated_pull_requests
+  end
+
+  def pull_request_filters
+    {
+      q: params[:q],
+      state: Array(params[:state]).reject(&:blank?),
+      reviewer_id: Array(params[:reviewer_id]).reject(&:blank?),
+      review_time: params[:review_time]
+    }
+  end
+
+  def paginated_pull_requests
+    filtered_pull_requests.includes(review_assignments: :reviewer).page(params[:page]).per(@per_page)
+  end
+
+  def filtered_pull_requests
+    scoped = @repository.pull_requests.search_by_query(@filters[:q]).with_state(@filters[:state])
+    scoped.with_reviewer(@filters[:reviewer_id]).with_review_time(@filters[:review_time])
+  end
 
   def repository_params
     params.require(:repository).permit(:github_full_name, :webhook_secret, :provider)

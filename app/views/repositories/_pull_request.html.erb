@@ -4,8 +4,7 @@
     <span class="text-slate-400">#<%= pull_request.github_number %></span> <%= pull_request.title %>
   </td>
   <td class="whitespace-nowrap px-6 py-4">
-    <% badge = { "open" => "bg-amber-50 text-amber-700", "merged" => "bg-emerald-50 text-emerald-700", "closed" => "bg-slate-100 text-slate-500" }[pull_request.state] %>
-    <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-medium <%= badge %>"><%= t("views.repositories.pull_request.states.#{pull_request.state}", default: pull_request.state) %></span>
+    <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-medium <%= pull_request_state_badge_classes(pull_request.state) %>"><%= t("views.repositories.pull_request.states.#{pull_request.state}", default: pull_request.state) %></span>
   </td>
   <td class="whitespace-nowrap px-6 py-4 text-slate-600"><%= assignment&.reviewer&.github_login || t('views.repositories.pull_request.unassigned') %></td>
   <td class="whitespace-nowrap px-6 py-4 text-slate-500"><%= assignment&.matched_tech || (assignment ? t('views.repositories.pull_request.availability') : "—") %></td>

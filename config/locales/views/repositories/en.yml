@@ -91,6 +91,18 @@ en:
         column_reviewer: "Assigned reviewer"
         column_matched_by: "Matched by"
         column_review_time: "Review time"
+        search:
+          heading: "Search"
+          hide: "Hide filters"
+          query_label: "Name or number"
+          query_placeholder: "PR name or number"
+          review_time_all: "All"
+          review_time_under_1_day: "Under 1 day"
+          review_time_1_to_3_days: "1 to 3 days"
+          review_time_over_3_days: "Over 3 days"
+          submit: "Search"
+          clear: "Clear filters"
+          empty: "No pull requests match the current filters."
       pull_request:
         unassigned: "Unassigned"
         availability: "Availability"
