@@ -13,7 +13,7 @@ module Gitlab
     end
 
     def call
-      gitlab_client.team_members(repository.github_full_name).auto_paginate do |member|
+      gitlab_client.all_members(repository.github_full_name).auto_paginate do |member|
         contributor = Contributor.find_or_create_by!(github_login: member.username)
         RepositoryContributor.find_or_create_by!(repository: repository, contributor: contributor)
       end

@@ -32,7 +32,7 @@ class ReviewerSelector
       matched_tech: matched_tech_for(pull_request, best[:contributor])
     )
     assignment.complete! unless pull_request.state == 'open'
-    assign_reviewer_in_github(pull_request, best[:contributor])
+    assign_reviewer_remotely(pull_request, best[:contributor])
 
     assignment
   end
@@ -45,12 +45,34 @@ class ReviewerSelector
     top_tech if top_score&.positive?
   end
 
+  def self.assign_reviewer_remotely(pull_request, reviewer)
+    if pull_request.repository.provider == 'gitlab'
+      assign_reviewer_in_gitlab(pull_request, reviewer)
+    else
+      assign_reviewer_in_github(pull_request, reviewer)
+    end
+  end
+
   def self.assign_reviewer_in_github(pull_request, reviewer)
-    client = Octokit::Client.new(access_token: ENV.fetch('GITHUB_ACCESS_TOKEN'))
+    repository = pull_request.repository
+    client = Octokit::Client.new(access_token: repository.user.configuration.github_access_token)
     client.request_pull_request_review(
-      pull_request.repository.github_full_name,
+      repository.github_full_name,
       pull_request.github_number,
       reviewers: [reviewer.github_login]
     )
+  end
+
+  def self.assign_reviewer_in_gitlab(pull_request, reviewer)
+    repository = pull_request.repository
+    configuration = repository.user.configuration
+    client = ::Gitlab.client(
+      endpoint: configuration.gitlab_api_endpoint, private_token: configuration.gitlab_access_token
+    )
+
+    gitlab_user = client.users(username: reviewer.github_login).first
+    return unless gitlab_user
+
+    client.update_merge_request(repository.github_full_name, pull_request.github_number, reviewer_ids: [gitlab_user.id])
   end
 end

@@ -15,7 +15,7 @@ RSpec.describe Gitlab::GitlabContributorsImporter do
       members = usernames.map { |username| gitlab_member(username) }
       paginated = double
       allow(paginated).to receive(:auto_paginate) { |&block| members.each(&block) }
-      allow_any_instance_of(Gitlab::Client).to receive(:team_members)
+      allow_any_instance_of(Gitlab::Client).to receive(:all_members)
         .with(repository.github_full_name)
         .and_return(paginated)
     end
@@ -57,7 +57,7 @@ RSpec.describe Gitlab::GitlabContributorsImporter do
       paginated = double(auto_paginate: nil)
       expect(Gitlab).to receive(:client)
         .with(endpoint: 'https://gitlab.example.com/api/v4', private_token: gitlab_access_token)
-        .and_return(instance_double(Gitlab::Client, team_members: paginated))
+        .and_return(instance_double(Gitlab::Client, all_members: paginated))
 
       described_class.call(repository, gitlab_access_token)
     end
@@ -66,7 +66,7 @@ RSpec.describe Gitlab::GitlabContributorsImporter do
       paginated = double(auto_paginate: nil)
       expect(Gitlab).to receive(:client)
         .with(endpoint: 'https://gitlab.com/api/v4', private_token: gitlab_access_token)
-        .and_return(instance_double(Gitlab::Client, team_members: paginated))
+        .and_return(instance_double(Gitlab::Client, all_members: paginated))
 
       described_class.call(repository, gitlab_access_token)
     end
