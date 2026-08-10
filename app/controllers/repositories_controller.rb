@@ -68,7 +68,10 @@ class RepositoriesController < ApplicationController
   end
 
   def paginated_pull_requests
-    filtered_pull_requests.includes(review_assignments: :reviewer).page(params[:page]).per(@per_page)
+    filtered_pull_requests.includes(review_assignments: :reviewer)
+                          .page(params[:page])
+                          .per(@per_page)
+                          .order(created_at: :desc)
   end
 
   def filtered_pull_requests

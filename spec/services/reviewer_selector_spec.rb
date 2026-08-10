@@ -4,7 +4,9 @@ require 'rails_helper'
 
 RSpec.describe ReviewerSelector do
   let(:user) { User.create!(email: 'user@example.com', password: 'password123') }
-  let(:repository) { Repository.create!(github_full_name: 'arturo/demo', webhook_secret: 's3cr3t', user: user) }
+  let(:repository) do
+    Repository.create!(github_full_name: 'arturo/demo', webhook_secret: 's3cr3t', user: user, provider: 'github')
+  end
   let(:author) { Contributor.create!(github_login: 'autora-pr') }
   let(:experta_ruby) { Contributor.create!(github_login: 'experta-ruby') }
   let(:experta_saturada) { Contributor.create!(github_login: 'experta-saturada') }
@@ -29,6 +31,9 @@ RSpec.describe ReviewerSelector do
   end
 
   before do
+    Configuration.create!(user: user, lookback_months: 1,
+                          github_access_token: 'gh-token', gitlab_access_token: 'gl-token')
+
     # Todos han contribuido antes al repo (para aparecer como candidatos).
     merged_pr_touching(experta_ruby, 'Ruby', lines: 500)
     merged_pr_touching(experta_saturada, 'Ruby', lines: 800)
@@ -140,6 +145,30 @@ RSpec.describe ReviewerSelector do
     assignment = described_class.assign!(pr)
 
     expect(assignment.reviewer).to eq(novato)
+  end
+
+  it 'assign! requests the review in GitHub using the token from the configuration' do
+    pr = open_pr_touching('Ruby')
+
+    expect(Octokit::Client).to receive(:new).with(access_token: 'gh-token').and_call_original
+
+    described_class.assign!(pr)
+  end
+
+  it 'assign! sets the reviewer in GitLab using the token from the configuration when the repository is on GitLab' do
+    repository.update!(provider: 'gitlab')
+    pr = open_pr_touching('Ruby')
+    gitlab_client = instance_double(Gitlab::Client, users: [double(id: 99)], update_merge_request: true)
+
+    expect(Gitlab).to receive(:client)
+      .with(endpoint: 'https://gitlab.com/api/v4', private_token: 'gl-token')
+      .and_return(gitlab_client)
+
+    assignment = described_class.assign!(pr)
+
+    expect(gitlab_client).to have_received(:users).with(username: assignment.reviewer.github_login)
+    expect(gitlab_client).to have_received(:update_merge_request)
+      .with(repository.github_full_name, pr.github_number, reviewer_ids: [99])
   end
 
   it 'assign! returns nil if there is no candidates' do
