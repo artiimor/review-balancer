@@ -1,13 +1,13 @@
-<div class="mx-auto w-full max-w-md rounded-2xl bg-white p-10 text-center shadow-xl ring-1 ring-slate-900/5">
-  <div class="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-600 text-2xl font-bold text-white">
+<div class="mx-auto w-full max-w-md rounded-2xl bg-white p-10 text-center shadow-xl ring-1 ring-slate-900/5 dark:bg-slate-800 dark:ring-white/10">
+  <div class="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-600 text-2xl font-bold text-white dark:bg-indigo-500">
     RB
   </div>
 
-  <h1 class="text-2xl font-semibold tracking-tight text-slate-900"><%= t('views.home.index.title') %></h1>
-  <p class="mt-2 text-sm text-slate-500"><%= t('views.home.index.subtitle') %></p>
+  <h1 class="text-2xl font-semibold tracking-tight text-slate-900 dark:text-white"><%= t('views.home.index.title') %></h1>
+  <p class="mt-2 text-sm text-slate-500 dark:text-slate-400"><%= t('views.home.index.subtitle') %></p>
 
   <div class="mt-8">
     <%= link_to t('views.home.index.sign_in'), new_user_session_path,
-          class: "inline-flex w-full items-center justify-center rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500" %>
+          class: "inline-flex w-full items-center justify-center rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500 dark:bg-indigo-500 dark:hover:bg-indigo-400" %>
   </div>
 </div>

@@ -1,5 +1,5 @@
 <span>
-  <%= link_to_unless current_page.last?, t('views.pagination.last').html_safe, url, remote: remote, class: "inline-flex h-8 items-center justify-center rounded-lg px-2.5 text-sm font-medium text-slate-500 transition hover:bg-slate-100 hover:text-slate-900" do |text| -%>
-    <span class="inline-flex h-8 items-center justify-center rounded-lg px-2.5 text-sm font-medium text-slate-200"><%= text %></span>
+  <%= link_to_unless current_page.last?, t('views.pagination.last').html_safe, url, remote: remote, class: "inline-flex h-8 items-center justify-center rounded-lg px-2.5 text-sm font-medium text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-white" do |text| -%>
+    <span class="inline-flex h-8 items-center justify-center rounded-lg px-2.5 text-sm font-medium text-slate-200 dark:text-slate-600"><%= text %></span>
   <% end -%>
 </span>

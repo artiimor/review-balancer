@@ -3,3 +3,4 @@ en:
     layouts:
       application:
         title: "ReviewBalancer"
+        toggle_theme: "Toggle theme"

@@ -1,24 +1,24 @@
 
 <%= turbo_frame_tag "contributors" do %>
   <div id="contributor-table" class="overflow-x-auto">
-    <table class="min-w-full divide-y divide-slate-100 text-sm">
-      <thead class="bg-slate-50">
+    <table class="min-w-full divide-y divide-slate-100 text-sm dark:divide-slate-700">
+      <thead class="bg-slate-50 dark:bg-slate-900/50">
         <tr>
-          <th class="px-6 py-3 text-left font-medium text-slate-500">
+          <th class="px-6 py-3 text-left font-medium text-slate-500 dark:text-slate-400">
             <% if @repository.provider == 'github' %>
               <%= t('views.repositories.contributors.table.github_login') %>
             <% else %>
               <%= t('views.repositories.contributors.table.gitlab_login') %>
             <% end %>
           </th>
-          <th class="px-6 py-3 text-left font-medium text-slate-500"><%= t('views.repositories.contributors.table.name') %></th>
-          <th class="px-6 py-3 text-left font-medium text-slate-500"><%= t('views.repositories.contributors.table.active') %></th>
-          <th class="px-6 py-3 text-left font-medium text-slate-500"><%= t('views.repositories.contributors.table.pending_reviews') %></th>
-          <th class="px-6 py-3 text-left font-medium text-slate-500"><%= t('views.repositories.contributors.table.created_at') %></th>
-          <th class="px-6 py-3 text-left font-medium text-slate-500"></th>
+          <th class="px-6 py-3 text-left font-medium text-slate-500 dark:text-slate-400"><%= t('views.repositories.contributors.table.name') %></th>
+          <th class="px-6 py-3 text-left font-medium text-slate-500 dark:text-slate-400"><%= t('views.repositories.contributors.table.active') %></th>
+          <th class="px-6 py-3 text-left font-medium text-slate-500 dark:text-slate-400"><%= t('views.repositories.contributors.table.pending_reviews') %></th>
+          <th class="px-6 py-3 text-left font-medium text-slate-500 dark:text-slate-400"><%= t('views.repositories.contributors.table.created_at') %></th>
+          <th class="px-6 py-3 text-left font-medium text-slate-500 dark:text-slate-400"></th>
         </tr>
       </thead>
-      <tbody id="contributors" class="divide-y divide-slate-100">
+      <tbody id="contributors" class="divide-y divide-slate-100 dark:divide-slate-700">
         <%= render partial: 'repositories/contributors/contributor', collection: contributors %>
       </tbody>
     </table>

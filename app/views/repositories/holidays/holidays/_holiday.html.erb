@@ -1,13 +1,13 @@
-<tr id="<%= dom_id(holiday) %>" class="hover:bg-slate-50">
-  <td class="whitespace-nowrap px-6 py-4 font-medium text-slate-900"><%= holiday.start_date %></td>
-  <td class="whitespace-nowrap px-6 py-4 text-slate-600"><%= holiday.end_date %></td>
-  <td class="px-6 py-4 text-slate-600">
-    <span class="text-slate-400"><%= holiday.created_at %></span>
+<tr id="<%= dom_id(holiday) %>" class="hover:bg-slate-50 dark:hover:bg-slate-700/50">
+  <td class="whitespace-nowrap px-6 py-4 font-medium text-slate-900 dark:text-white"><%= holiday.start_date %></td>
+  <td class="whitespace-nowrap px-6 py-4 text-slate-600 dark:text-slate-400"><%= holiday.end_date %></td>
+  <td class="px-6 py-4 text-slate-600 dark:text-slate-400">
+    <span class="text-slate-400 dark:text-slate-500"><%= holiday.created_at %></span>
   </td>
-  <td class="whitespace-nowrap px-6 py-4 text-slate-500">
+  <td class="whitespace-nowrap px-6 py-4 text-slate-500 dark:text-slate-400">
     <div class="flex items-center gap-1">
       <%= link_to edit_repository_contributor_holiday_path(@repository, @contributor, holiday),
-            class: 'rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-indigo-600',
+            class: 'rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-indigo-600 dark:text-slate-500 dark:hover:bg-slate-700 dark:hover:text-indigo-400',
             data: { turbo_frame: 'holiday-modal' },
             aria: { label: t('views.repositories.contributors.holidays.holiday_row.edit_aria') } do %>
         <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
@@ -18,7 +18,7 @@
       <%= button_to repository_contributor_holiday_path(@repository, @contributor, holiday), method: :delete,
             form: { class: 'contents' },
             data: { turbo_confirm: t('views.repositories.contributors.holidays.holiday_row.delete_confirm') },
-            class: 'cursor-pointer rounded-lg p-1.5 text-slate-400 transition hover:bg-red-50 hover:text-red-600',
+            class: 'cursor-pointer rounded-lg p-1.5 text-slate-400 transition hover:bg-red-50 hover:text-red-600 dark:text-slate-500 dark:hover:bg-red-950 dark:hover:text-red-400',
             aria: { label: t('views.repositories.contributors.holidays.holiday_row.delete_aria') } do %>
         <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
           <path fill-rule="evenodd" d="M8.75 1a1.75 1.75 0 0 0-1.75 1.75V3h-3a.75.75 0 0 0 0 1.5h.3l.7 11.2A2 2 0 0 0 6.99 17.5h6.02a2 2 0 0 0 1.99-1.8l.7-11.2h.3a.75.75 0 0 0 0-1.5h-3v-.25A1.75 1.75 0 0 0 11.25 1h-2.5ZM10 6a.75.75 0 0 1 .75.75v6.5a.75.75 0 0 1-1.5 0v-6.5A.75.75 0 0 1 10 6Zm-2.75.75a.75.75 0 0 0-1.5 0v6.5a.75.75 0 0 0 1.5 0v-6.5Zm5.5 0a.75.75 0 0 0-1.5 0v6.5a.75.75 0 0 0 1.5 0v-6.5Z" clip-rule="evenodd" />
