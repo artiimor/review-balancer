@@ -7,12 +7,17 @@ RSpec.describe Gitlab::GitlabPullRequestsImporter do
     let(:repository) { create(:repository, github_full_name: 'acme/checkout-api', provider: 'gitlab') }
     let!(:gitlab_access_token) { 'fake_token' }
 
-    def gitlab_mr(iid:, username: 'alice', title: 'Some MR', created_at: 1.day.ago, merged_at: 1.day.ago)
-      double(iid: iid, author: double(username: username), title: title, created_at: created_at, merged_at: merged_at)
+    def gitlab_mr(iid:, username: 'alice', created_at: 1.day.ago, merged_at: 1.day.ago, reviewers: [])
+      double(iid: iid, author: double(username: username), title: 'Some MR', created_at: created_at,
+             merged_at: merged_at, reviewers: reviewers)
     end
 
     def gitlab_file(path:, diff: "+++ b/#{path}\n--- a/#{path}\n+line1\n+line2\n-line3\n")
       double(new_path: path, old_path: path, diff: diff)
+    end
+
+    def gitlab_reviewer(username:)
+      double(username: username)
     end
 
     def stub_merge_requests(mrs, page: 1)
@@ -48,6 +53,51 @@ RSpec.describe Gitlab::GitlabPullRequestsImporter do
       stub_merge_requests([], page: 2)
 
       expect { described_class.call(repository, gitlab_access_token) }.not_to change(PullRequest, :count)
+    end
+
+    it 'imports the requested reviewer when the merge request already has one' do
+      stub_merge_requests([gitlab_mr(iid: 42, reviewers: [gitlab_reviewer(username: 'bob')])])
+      stub_merge_requests([], page: 2)
+      allow_any_instance_of(Gitlab::Client).to receive(:merge_request_changes).and_return(double(changes: []))
+
+      described_class.call(repository, gitlab_access_token)
+
+      pull_request = PullRequest.find_by(repository: repository, github_number: 42)
+      assignment = pull_request.current_review_assignment
+      expect(assignment.reviewer.github_login).to eq('bob')
+      expect(assignment.completed_at).to be_present
+    end
+
+    it 'links the imported reviewer to the repository' do
+      stub_merge_requests([gitlab_mr(iid: 42, reviewers: [gitlab_reviewer(username: 'bob')])])
+      stub_merge_requests([], page: 2)
+      allow_any_instance_of(Gitlab::Client).to receive(:merge_request_changes).and_return(double(changes: []))
+
+      described_class.call(repository, gitlab_access_token)
+
+      expect(repository.contributors.reload.map(&:github_login)).to include('bob')
+    end
+
+    it 'does not create a review_assignment when the merge request has no reviewers' do
+      stub_merge_requests([gitlab_mr(iid: 42)])
+      stub_merge_requests([], page: 2)
+      allow_any_instance_of(Gitlab::Client).to receive(:merge_request_changes).and_return(double(changes: []))
+
+      described_class.call(repository, gitlab_access_token)
+
+      pull_request = PullRequest.find_by(repository: repository, github_number: 42)
+      expect(pull_request.review_assignments).to be_empty
+    end
+
+    it 'does not import a reviewer again if the pull request already has one' do
+      pull_request = create(:pull_request, repository: repository, github_number: 42)
+      create(:review_assignment, pull_request: pull_request)
+      stub_merge_requests([gitlab_mr(iid: 42, username: pull_request.author.github_login,
+                                     reviewers: [gitlab_reviewer(username: 'someone_else')])])
+      stub_merge_requests([], page: 2)
+      allow_any_instance_of(Gitlab::Client).to receive(:merge_request_changes).and_return(double(changes: []))
+
+      expect { described_class.call(repository, gitlab_access_token) }.not_to change(ReviewAssignment, :count)
     end
 
     it 'stops once it reaches a merge request older than the 1 year lookback' do

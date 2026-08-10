@@ -21,7 +21,7 @@ module Github
 
       case payload['action']
       when 'opened'
-        handle_opened(pull_request)
+        handle_opened(pull_request, pr_data)
       when 'closed'
         handle_closed(pull_request, pr_data)
       end
@@ -31,9 +31,20 @@ module Github
 
     attr_reader :repository, :payload
 
-    def handle_opened(pull_request)
+    def handle_opened(pull_request, pr_data)
       record_file_changes(pull_request)
-      ReviewerSelector.assign!(pull_request)
+      return if pull_request.review_assignments.exists?
+
+      import_requested_reviewer(pull_request, pr_data) || ReviewerSelector.assign!(pull_request)
+    end
+
+    def import_requested_reviewer(pull_request, pr_data)
+      login = pr_data['requested_reviewers']&.first&.dig('login')
+      return nil if login.blank?
+
+      reviewer = Contributor.find_or_create_by!(github_login: login)
+      RepositoryContributor.find_or_create_by!(repository: repository, contributor: reviewer)
+      ReviewAssignment.create!(pull_request: pull_request, reviewer: reviewer, assigned_at: Time.current)
     end
 
     def handle_closed(pull_request, pr_data)

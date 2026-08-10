@@ -46,19 +46,32 @@ module Github
     end
 
     def record_merged_pull_request(remote_pull_request)
+      pull_request = find_or_create_pull_request(remote_pull_request)
+      pull_request.update!(state: 'merged', merged_at: remote_pull_request.merged_at)
+
+      record_file_changes(pull_request)
+      import_requested_reviewer(pull_request, remote_pull_request) if pull_request.review_assignments.empty?
+    end
+
+    def find_or_create_pull_request(remote_pull_request)
       author = Contributor.find_or_create_by!(github_login: remote_pull_request.user.login)
 
-      pull_request = PullRequest.find_or_create_by!(
-        repository: repository, github_number: remote_pull_request.number
-      ) do |record|
+      PullRequest.find_or_create_by!(repository: repository, github_number: remote_pull_request.number) do |record|
         record.author = author
         record.title = remote_pull_request.title
         record.opened_at = remote_pull_request.created_at
       end
+    end
 
-      pull_request.update!(state: 'merged', merged_at: remote_pull_request.merged_at)
+    def import_requested_reviewer(pull_request, remote_pull_request)
+      login = remote_pull_request.requested_reviewers&.first&.login
+      return nil if login.blank?
 
-      record_file_changes(pull_request)
+      reviewer = Contributor.find_or_create_by!(github_login: login)
+      RepositoryContributor.find_or_create_by!(repository: repository, contributor: reviewer)
+      ReviewAssignment.create!(
+        pull_request: pull_request, reviewer: reviewer, assigned_at: Time.current, completed_at: Time.current
+      )
     end
 
     def record_file_changes(pull_request)

@@ -58,6 +58,17 @@ RSpec.describe Gitlab::GitlabPullRequestProcessor do
         end.not_to change(PullRequest, :count)
       end
 
+      it 'does not assign a reviewer again if the pull_request already has one' do
+        pull_request = create(:pull_request, github_number: payload['object_attributes']['iid'], repository: repository)
+        create(:review_assignment, pull_request: pull_request)
+
+        expect do
+          described_class.call(repository, payload, gitlab_access_token)
+        end.not_to change(ReviewAssignment, :count)
+
+        expect(ReviewerSelector).not_to have_received(:assign!)
+      end
+
       it 'calls ReviewerSelector.assign!' do
         described_class.call(repository, payload, gitlab_access_token)
 
@@ -81,6 +92,41 @@ RSpec.describe Gitlab::GitlabPullRequestProcessor do
           .and_return(client)
 
         described_class.call(repository, payload, gitlab_access_token)
+      end
+    end
+
+    context 'when the merge request is opened with a reviewer already requested' do
+      let(:payload) { JSON.parse(file_fixture('gitlab_merge_request_opened_with_reviewer.json').read) }
+      let(:reviewer_login) { payload['reviewers'].first['username'] }
+
+      before do
+        no_op_client = instance_double(Gitlab::Client, merge_request_changes: double(changes: []))
+        allow(Gitlab).to receive(:client).and_return(no_op_client)
+      end
+
+      it 'creates a review_assignment for the already-requested reviewer instead of running the selector' do
+        expect(ReviewerSelector).not_to receive(:assign!)
+
+        described_class.call(repository, payload, gitlab_access_token)
+
+        pull_request = PullRequest.find_by(github_number: payload['object_attributes']['iid'], repository: repository)
+        assignment = pull_request.current_review_assignment
+        expect(assignment.reviewer.github_login).to eq(reviewer_login)
+      end
+
+      it 'creates the reviewer as a contributor if they do not exist yet' do
+        expect(Contributor.find_by(github_login: reviewer_login)).to be_nil
+
+        described_class.call(repository, payload, gitlab_access_token)
+
+        expect(Contributor.find_by(github_login: reviewer_login)).to be_present
+      end
+
+      it 'links the reviewer to the repository so they show up as a contributor' do
+        described_class.call(repository, payload, gitlab_access_token)
+
+        reviewer = Contributor.find_by(github_login: reviewer_login)
+        expect(repository.contributors.reload).to include(reviewer)
       end
     end
 

@@ -2,7 +2,6 @@ es:
   views:
     repositories:
       index:
-        badge: "Balanceo activo"
         settings: "Configuración"
         sign_out: "Cerrar sesión"
         heading: "Repositorios"

@@ -35,7 +35,18 @@ module Gitlab
 
     def handle_opened(pull_request)
       record_file_changes(pull_request)
-      ReviewerSelector.assign!(pull_request)
+      return if pull_request.review_assignments.exists?
+
+      import_requested_reviewer(pull_request) || ReviewerSelector.assign!(pull_request)
+    end
+
+    def import_requested_reviewer(pull_request)
+      username = payload['reviewers']&.first&.dig('username')
+      return nil if username.blank?
+
+      reviewer = Contributor.find_or_create_by!(github_login: username)
+      RepositoryContributor.find_or_create_by!(repository: repository, contributor: reviewer)
+      ReviewAssignment.create!(pull_request: pull_request, reviewer: reviewer, assigned_at: Time.current)
     end
 
     def finalize(pull_request, state:, merged_at: nil)

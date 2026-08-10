@@ -7,12 +7,17 @@ RSpec.describe Github::GithubPullRequestsImporter do
     let(:repository) { create(:repository, github_full_name: 'acme/checkout-api') }
     let!(:github_access_token) { 'fake_token' }
 
-    def github_pr(number:, login: 'alice', title: 'Some PR', created_at: 1.day.ago, merged_at: 1.day.ago)
-      double(number: number, user: double(login: login), title: title, created_at: created_at, merged_at: merged_at)
+    def github_pr(number:, login: 'alice', created_at: 1.day.ago, merged_at: 1.day.ago, requested_reviewers: [])
+      double(number: number, user: double(login: login), title: 'Some PR', created_at: created_at,
+             merged_at: merged_at, requested_reviewers: requested_reviewers)
     end
 
     def github_file(filename:, additions: 3, deletions: 2)
       double(filename: filename, additions: additions, deletions: deletions)
+    end
+
+    def github_reviewer(login:)
+      double(login: login)
     end
 
     def stub_pull_requests(*prs)
@@ -47,6 +52,47 @@ RSpec.describe Github::GithubPullRequestsImporter do
       stub_pull_requests(github_pr(number: 7, merged_at: nil))
 
       expect { described_class.call(repository, github_access_token) }.not_to change(PullRequest, :count)
+    end
+
+    it 'imports the requested reviewer when the pull request already has one' do
+      stub_pull_requests(github_pr(number: 42, requested_reviewers: [github_reviewer(login: 'bob')]))
+      allow_any_instance_of(Octokit::Client).to receive(:pull_request_files).and_return([])
+
+      described_class.call(repository, github_access_token)
+
+      pull_request = PullRequest.find_by(repository: repository, github_number: 42)
+      assignment = pull_request.current_review_assignment
+      expect(assignment.reviewer.github_login).to eq('bob')
+      expect(assignment.completed_at).to be_present
+    end
+
+    it 'links the imported reviewer to the repository' do
+      stub_pull_requests(github_pr(number: 42, requested_reviewers: [github_reviewer(login: 'bob')]))
+      allow_any_instance_of(Octokit::Client).to receive(:pull_request_files).and_return([])
+
+      described_class.call(repository, github_access_token)
+
+      expect(repository.contributors.reload.map(&:github_login)).to include('bob')
+    end
+
+    it 'does not create a review_assignment when the pull request has no requested reviewers' do
+      stub_pull_requests(github_pr(number: 42))
+      allow_any_instance_of(Octokit::Client).to receive(:pull_request_files).and_return([])
+
+      described_class.call(repository, github_access_token)
+
+      pull_request = PullRequest.find_by(repository: repository, github_number: 42)
+      expect(pull_request.review_assignments).to be_empty
+    end
+
+    it 'does not import a reviewer again if the pull request already has one' do
+      pull_request = create(:pull_request, repository: repository, github_number: 42)
+      create(:review_assignment, pull_request: pull_request)
+      stub_pull_requests(github_pr(number: 42, login: pull_request.author.github_login,
+                                   requested_reviewers: [github_reviewer(login: 'someone_else')]))
+      allow_any_instance_of(Octokit::Client).to receive(:pull_request_files).and_return([])
+
+      expect { described_class.call(repository, github_access_token) }.not_to change(ReviewAssignment, :count)
     end
 
     it 'stops once it reaches a pull request older than the 1 year lookback' do

@@ -48,19 +48,32 @@ module Gitlab
     end
 
     def record_merged_pull_request(merge_request)
+      pull_request = find_or_create_pull_request(merge_request)
+      pull_request.update!(state: 'merged', merged_at: merge_request.merged_at)
+
+      record_file_changes(pull_request)
+      import_requested_reviewer(pull_request, merge_request) if pull_request.review_assignments.empty?
+    end
+
+    def find_or_create_pull_request(merge_request)
       author = Contributor.find_or_create_by!(github_login: merge_request.author.username)
 
-      pull_request = PullRequest.find_or_create_by!(
-        repository: repository, github_number: merge_request.iid
-      ) do |record|
+      PullRequest.find_or_create_by!(repository: repository, github_number: merge_request.iid) do |record|
         record.author = author
         record.title = merge_request.title
         record.opened_at = merge_request.created_at
       end
+    end
 
-      pull_request.update!(state: 'merged', merged_at: merge_request.merged_at)
+    def import_requested_reviewer(pull_request, merge_request)
+      username = merge_request.reviewers&.first&.username
+      return nil if username.blank?
 
-      record_file_changes(pull_request)
+      reviewer = Contributor.find_or_create_by!(github_login: username)
+      RepositoryContributor.find_or_create_by!(repository: repository, contributor: reviewer)
+      ReviewAssignment.create!(
+        pull_request: pull_request, reviewer: reviewer, assigned_at: Time.current, completed_at: Time.current
+      )
     end
 
     def record_file_changes(pull_request)
