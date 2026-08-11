@@ -38,7 +38,9 @@
     <% end %>
 
     <main class="flex min-h-screen items-center justify-center p-6">
-      <%= yield %>
+      <div class="w-full min-w-0">
+        <%= yield %>
+      </div>
     </main>
   </body>
 </html>
