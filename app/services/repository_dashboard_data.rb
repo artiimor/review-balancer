@@ -23,7 +23,7 @@ class RepositoryDashboardData
   attr_reader :repository
 
   def contributors
-    @contributors ||= repository.contributors.order(:github_login).to_a
+    @contributors ||= repository.active_contributors.order(:github_login).to_a
   end
 
   def pending_reviews_by_contributor

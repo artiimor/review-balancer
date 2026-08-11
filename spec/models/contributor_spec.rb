@@ -34,14 +34,6 @@ RSpec.describe Contributor do
   end
 
   describe 'scopes' do
-    it 'shows by default active contributors' do
-      active_contributor = create(:contributor)
-      unactive_contributor = create(:contributor, active: false)
-
-      expect(Contributor.all).to eq([active_contributor])
-      expect(Contributor.unscoped.all).to include(unactive_contributor)
-    end
-
     describe '.not_in_holidays' do
       it 'excludes a contributor currently on holiday' do
         on_holiday = create(:contributor)

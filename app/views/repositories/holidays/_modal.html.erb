@@ -22,6 +22,6 @@
     <div id="error_message">
       <%= render partial: 'repositories/error_message', locals: { message: holiday.errors.full_messages.to_sentence.presence } %>
     </div>
-    <%= render "repositories/holidays/holidays/form", holiday: holiday %>
+    <%= render "repositories/holidays/form", holiday: holiday %>
   </div>
 </div>

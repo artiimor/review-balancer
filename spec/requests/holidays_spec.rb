@@ -42,9 +42,9 @@ RSpec.describe 'Holidays', type: :request do
       expect(response.body).to include('Todavía no hay vacaciones registradas para este contributor.')
     end
 
-    it 'also shows holidays for an inactive contributor, bypassing the default active-only scope' do
-      contributor = create(:contributor, active: false)
-      repository.contributors << contributor
+    it 'also shows holidays for an inactive contributor' do
+      contributor = create(:contributor)
+      create(:repository_contributor, repository: repository, contributor: contributor, active: false)
       create(:holiday, contributor: contributor)
 
       get repository_contributor_holidays_path(repository, contributor)

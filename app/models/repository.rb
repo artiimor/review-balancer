@@ -13,4 +13,9 @@ class Repository < ApplicationRecord
   validates :webhook_secret, presence: true
 
   validates :provider, presence: true, inclusion: { in: %w[github gitlab] }
+
+  def active_contributors
+    contributor_ids = repository_contributors.active.pluck(:contributor_id)
+    Contributor.where(id: contributor_ids)
+  end
 end

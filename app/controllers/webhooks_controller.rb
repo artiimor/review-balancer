@@ -7,9 +7,7 @@ class WebhooksController < ApplicationController
     repository = Repository.find_by(github_full_name: payload['repository']['full_name'], provider: 'github')
     return head :not_found unless repository
 
-   return head :unauthorized unless valid_github_signature?(repository)
-
-    event = request.headers['X-GitHub-Event']
+    return head :unauthorized unless valid_github_signature?(repository)
 
     if github_merge_request_event?
       ProcessPullRequestJob.perform_later(repository.id, payload, repository.user.configuration&.github_access_token)

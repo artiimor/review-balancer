@@ -45,7 +45,7 @@ class RepositoriesController < ApplicationController
   def show
     @repository = current_user.repositories.find(params[:id])
     @per_page = ALLOWED_PER_PAGE.include?(params[:per].to_i) ? params[:per].to_i : 25
-    @reviewers = @repository.contributors.order(:github_login)
+    @reviewers = @repository.active_contributors.order(:github_login)
     load_pull_requests
     @dashboard = RepositoryDashboardData.call(@repository)
   end

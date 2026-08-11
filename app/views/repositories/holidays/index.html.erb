@@ -10,7 +10,7 @@
       <% end %>
       <div>
         <h1 class="text-lg font-semibold tracking-tight text-slate-900 dark:text-white"><%= @contributor.name.presence || @contributor.github_login %></h1>
-        <%= render partial: 'repositories/holidays/holidays/count', locals: { holidays: @holidays } %>
+        <%= render partial: 'repositories/holidays/count', locals: { holidays: @holidays } %>
       </div>
     </div>
   </div>
@@ -28,7 +28,7 @@
       <% end %>
     </div>
 
-    <%= render partial: 'repositories/holidays/holidays/table', locals: { holidays: @holidays } %>
+    <%= render partial: 'repositories/holidays/table', locals: { holidays: @holidays } %>
 
     <%= turbo_frame_tag "holiday-modal" %>
   </div>

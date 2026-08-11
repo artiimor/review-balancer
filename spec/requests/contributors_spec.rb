@@ -11,8 +11,8 @@ RSpec.describe 'Contributors', type: :request do
 
   describe '#index' do
     it "lists the repository's active contributors" do
-      contributor = create(:contributor, active: true)
-      repository.contributors << contributor
+      contributor = create(:contributor)
+      create(:repository_contributor, repository: repository, contributor: contributor, active: true)
 
       get repository_contributors_path(repository)
 
@@ -20,9 +20,9 @@ RSpec.describe 'Contributors', type: :request do
       expect(response.body).to include(contributor.github_login)
     end
 
-    it 'also lists inactive contributors, bypassing the default active-only scope' do
-      contributor = create(:contributor, active: false)
-      repository.contributors << contributor
+    it 'also lists inactive contributors' do
+      contributor = create(:contributor)
+      create(:repository_contributor, repository: repository, contributor: contributor, active: false)
 
       get repository_contributors_path(repository)
 
@@ -32,8 +32,8 @@ RSpec.describe 'Contributors', type: :request do
 
     it "does not list another repository's contributors" do
       other_repository = create(:repository, user: user)
-      own_contributor = create(:contributor, active: true)
-      other_contributor = create(:contributor, active: true)
+      own_contributor = create(:contributor)
+      other_contributor = create(:contributor)
       repository.contributors << own_contributor
       other_repository.contributors << other_contributor
 
@@ -62,49 +62,49 @@ RSpec.describe 'Contributors', type: :request do
 
   describe '#update' do
     it "deactivates one of the repository's active contributors" do
-      contributor = create(:contributor, active: true)
-      repository.contributors << contributor
+      contributor = create(:contributor)
+      repository_contributor = create(:repository_contributor, repository: repository, contributor: contributor, active: true)
 
       patch repository_contributor_path(repository, contributor), params: { contributor: { active: false } }
 
       expect(response).to redirect_to(repository_contributors_path(repository))
-      expect(contributor.reload.active).to eq(false)
+      expect(repository_contributor.reload.active).to eq(false)
     end
 
     it "reactivates one of the repository's inactive contributors" do
-      contributor = create(:contributor, active: false)
-      repository.contributors << contributor
+      contributor = create(:contributor)
+      repository_contributor = create(:repository_contributor, repository: repository, contributor: contributor, active: false)
 
       patch repository_contributor_path(repository, contributor), params: { contributor: { active: true } }
 
       expect(response).to redirect_to(repository_contributors_path(repository))
-      expect(contributor.reload.active).to eq(true)
+      expect(repository_contributor.reload.active).to eq(true)
     end
 
     it 'does not allow updating a contributor that does not belong to the repository' do
       other_repository = create(:repository, user: user)
-      contributor = create(:contributor, active: true)
-      other_repository.contributors << contributor
+      contributor = create(:contributor)
+      other_repository_contributor = create(:repository_contributor, repository: other_repository, contributor: contributor, active: true)
 
       patch repository_contributor_path(repository, contributor), params: { contributor: { active: false } }
 
       expect(response).to have_http_status(:not_found)
-      expect(contributor.reload.active).to eq(true)
+      expect(other_repository_contributor.reload.active).to eq(true)
     end
 
     it "does not allow updating a contributor through another user's repository" do
       other_repository = create(:repository, user: other_user)
-      contributor = create(:contributor, active: true)
-      other_repository.contributors << contributor
+      contributor = create(:contributor)
+      other_repository_contributor = create(:repository_contributor, repository: other_repository, contributor: contributor, active: true)
 
       patch repository_contributor_path(other_repository, contributor), params: { contributor: { active: false } }
 
       expect(response).to have_http_status(:not_found)
-      expect(contributor.reload.active).to eq(true)
+      expect(other_repository_contributor.reload.active).to eq(true)
     end
 
     it 'redirects to the sign in page when not authenticated' do
-      contributor = create(:contributor, active: true)
+      contributor = create(:contributor)
       repository.contributors << contributor
       sign_out user
 

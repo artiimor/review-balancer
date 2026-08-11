@@ -138,8 +138,8 @@ RSpec.describe ReviewerSelector do
   end
 
   it 'assign! does not assign a contributor who is deactivated' do
-    experta_ruby.update!(active: false)
-    experta_saturada.update!(active: false)
+    repository.repository_contributors.find_by!(contributor: experta_ruby).update!(active: false)
+    repository.repository_contributors.find_by!(contributor: experta_saturada).update!(active: false)
     pr = open_pr_touching('Ruby')
 
     assignment = described_class.assign!(pr)

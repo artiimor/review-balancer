@@ -10,9 +10,9 @@
     </thead>
     <tbody id="holidays" class="divide-y divide-slate-100 dark:divide-slate-700">
       <% if holidays.any? %>
-        <%= render partial: 'repositories/holidays/holidays/holiday', collection: holidays %>
+        <%= render partial: 'repositories/holidays/holiday', collection: holidays %>
       <% else %>
-        <%= render partial: 'repositories/holidays/holidays/empty_state' %>
+        <%= render partial: 'repositories/holidays/empty_state' %>
       <% end %>
     </tbody>
   </table>

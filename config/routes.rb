@@ -9,9 +9,7 @@ Rails.application.routes.draw do
   resources :repositories, only: %i[index new create show destroy] do
     scope module: :repositories do
       resources :contributors, only: %i[index update] do
-        scope module: :holidays do
-          resources :holidays, only: %i[index new create edit update destroy]
-        end
+        resources :holidays, only: %i[index new create edit update destroy]
       end
     end
   end
