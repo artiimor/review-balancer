@@ -4,7 +4,7 @@ require 'rails_helper'
 
 RSpec.describe Configuration, type: :model do
   describe 'validations' do
-    it { should validate_inclusion_of(:lookback_months).in_range(1..48) }
+    it { should validate_numericality_of(:lookback_months).is_in(1..48) }
   end
 
   describe 'associations' do

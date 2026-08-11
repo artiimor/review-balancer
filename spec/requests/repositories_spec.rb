@@ -114,7 +114,7 @@ RSpec.describe 'Repositories', type: :request do
 
         expect(response).to have_http_status(:ok)
         expect(response.body).to include('action="replace"', 'target="new-repository-modal"')
-        expect(response.body).to include('can&#39;t be blank')
+        expect(response.body).to include('no puede estar en blanco')
       end
     end
 
@@ -129,7 +129,7 @@ RSpec.describe 'Repositories', type: :request do
         end.not_to change(Repository, :count)
 
         expect(response).to have_http_status(:ok)
-        expect(response.body).to include('has already been taken')
+        expect(response.body).to include('ya está en uso')
       end
     end
 

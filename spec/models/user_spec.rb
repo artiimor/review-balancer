@@ -13,7 +13,7 @@ RSpec.describe User do
       user = build(:user, email: nil)
 
       expect(user).not_to be_valid
-      expect(user.errors[:email]).to include("can't be blank")
+      expect(user.errors[:email]).to include('no puede estar en blanco')
     end
 
     it 'is invalid with a duplicate email' do
@@ -21,7 +21,7 @@ RSpec.describe User do
       user = build(:user, email: 'taken@example.com')
 
       expect(user).not_to be_valid
-      expect(user.errors[:email]).to include('has already been taken')
+      expect(user.errors[:email]).to include('ya está en uso')
     end
 
     it 'is invalid with a duplicate email regardless of case' do
@@ -35,21 +35,21 @@ RSpec.describe User do
       user = build(:user, email: 'not-an-email')
 
       expect(user).not_to be_valid
-      expect(user.errors[:email]).to include('is invalid')
+      expect(user.errors[:email]).to include('no es válido')
     end
 
     it 'is invalid without a password' do
       user = build(:user, password: nil)
 
       expect(user).not_to be_valid
-      expect(user.errors[:password]).to include("can't be blank")
+      expect(user.errors[:password]).to include('no puede estar en blanco')
     end
 
     it 'is invalid with a password shorter than 6 characters' do
       user = build(:user, password: '12345')
 
       expect(user).not_to be_valid
-      expect(user.errors[:password]).to include('is too short (minimum is 6 characters)')
+      expect(user.errors[:password]).to include('es demasiado corto (6 caracteres mínimo)')
     end
   end
 end
