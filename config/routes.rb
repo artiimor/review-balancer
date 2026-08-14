@@ -11,6 +11,10 @@ Rails.application.routes.draw do
       resources :contributors, only: %i[index update] do
         resources :holidays, only: %i[index new create edit update destroy]
       end
+
+      resources :pull_requests, only: [] do
+        resources :review_assignments, only: %i[new create]
+      end
     end
   end
   resource :configuration, only: %i[show update], controller: 'configuration'

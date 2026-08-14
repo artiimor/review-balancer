@@ -1,0 +1,33 @@
+<div id="review-assignment-modal-content" data-controller="modal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4">
+  <div class="w-full max-w-md rounded-2xl bg-white p-8 shadow-xl ring-1 ring-slate-900/5 dark:bg-slate-800 dark:ring-white/10">
+    <div class="mb-6 flex items-start justify-between">
+      <div>
+        <h2 class="text-lg font-semibold tracking-tight text-slate-900 dark:text-white"><%= t('views.repositories.review_assignments.modal.title') %></h2>
+        <p class="mt-0.5 text-sm text-slate-500 dark:text-slate-400">#<%= pull_request.github_number %> <%= pull_request.title %></p>
+      </div>
+      <button type="button"
+              data-action="click->modal#close"
+              class="rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-700 dark:hover:text-slate-300" aria-label="<%= t('views.repositories.review_assignments.modal.close_aria') %>">
+        <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 0 1 1.414 0L10 8.586l4.293-4.293a1 1 0 1 1 1.414 1.414L11.414 10l4.293 4.293a1 1 0 0 1-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 0 1-1.414-1.414L8.586 10 4.293 5.707a1 1 0 0 1 0-1.414Z" clip-rule="evenodd" />
+        </svg>
+      </button>
+    </div>
+
+    <%= form_with url: repository_pull_request_review_assignments_path(pull_request.repository, pull_request),
+          method: :post, scope: :review_assignment, class: "space-y-5" do |f| %>
+      <div>
+        <%= f.label :reviewer_id, t('views.repositories.review_assignments.modal.reviewer_label'),
+              class: "block text-sm font-medium text-slate-700 dark:text-slate-300" %>
+        <%= f.select :reviewer_id, reviewers.map { |r| [r.github_login, r.id] },
+              { selected: pull_request.current_review_assignment&.reviewer_id },
+              { class: "mt-1.5 block w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:border-slate-600 dark:bg-slate-900 dark:text-white" } %>
+      </div>
+
+      <div class="flex items-center justify-end gap-3 pt-2">
+        <%= f.submit t('views.repositories.review_assignments.modal.submit'),
+              class: "cursor-pointer rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500 dark:bg-indigo-500 dark:hover:bg-indigo-400" %>
+      </div>
+    <% end %>
+  </div>
+</div>

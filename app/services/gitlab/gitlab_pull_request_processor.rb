@@ -53,7 +53,7 @@ module Gitlab
 
     def handle_review_requested(pull_request)
       username = payload['reviewers']&.first&.dig('username')
-      return if username.blank?
+      return if username.blank? || already_assigned_to?(pull_request, username)
 
       reviewer = Contributor.find_or_create_by!(github_login: username)
       RepositoryContributor.find_or_create_by!(repository: repository, contributor: reviewer)
@@ -62,6 +62,10 @@ module Gitlab
       ReviewAssignment.create!(
         pull_request: pull_request, reviewer: reviewer, assigned_at: Time.current, source: 'manual'
       )
+    end
+
+    def already_assigned_to?(pull_request, username)
+      pull_request.current_review_assignment&.reviewer&.github_login == username
     end
 
     def finalize(pull_request, state:, merged_at: nil)

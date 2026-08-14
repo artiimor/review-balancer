@@ -111,6 +111,12 @@ es:
           open: "abierta"
           merged: "fusionada"
           closed: "cerrada"
+      review_assignments:
+        modal:
+          title: "Reasignar revisor"
+          reviewer_label: "Revisor"
+          submit: "Asignar"
+          close_aria: "Cerrar"
       dashboard:
         show_charts: "Ver gráficos"
         hide_charts: "Ocultar gráficos"

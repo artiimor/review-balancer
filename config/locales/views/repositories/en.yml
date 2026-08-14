@@ -112,6 +112,12 @@ en:
           open: "open"
           merged: "merged"
           closed: "closed"
+      review_assignments:
+        modal:
+          title: "Reassign reviewer"
+          reviewer_label: "Reviewer"
+          submit: "Assign"
+          close_aria: "Close"
       dashboard:
         show_charts: "View charts"
         hide_charts: "Hide charts"

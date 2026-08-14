@@ -17,7 +17,7 @@ module Github
       # TODO el scope jode los repetidos
       pr_data = payload['pull_request']
 
-      author = Contributor.unscoped.find_or_create_by!(github_login: pr_data['user']['login'])
+      author = Contributor.find_or_create_by!(github_login: pr_data['user']['login'])
       pull_request = find_or_create_pull_request(pr_data, author)
 
       case payload['action']
@@ -52,7 +52,7 @@ module Github
 
     def handle_review_requested(pull_request)
       login = payload.dig('requested_reviewer', 'login')
-      return if login.blank?
+      return if login.blank? || already_assigned_to?(pull_request, login)
 
       reviewer = Contributor.find_or_create_by!(github_login: login)
       RepositoryContributor.find_or_create_by!(repository: repository, contributor: reviewer)
@@ -64,6 +64,10 @@ module Github
         assigned_at: Time.current,
         source: 'manual'
       )
+    end
+
+    def already_assigned_to?(pull_request, login)
+      pull_request.current_review_assignment&.reviewer&.github_login == login
     end
 
     def handle_closed(pull_request, pr_data)

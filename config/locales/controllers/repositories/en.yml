@@ -2,3 +2,5 @@ en:
   controllers:
     repositories:
       destroy_error: "The repository couldn't be deleted"
+      review_assignments:
+        assign_error: "The reviewer couldn't be assigned"

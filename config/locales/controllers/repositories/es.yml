@@ -2,3 +2,5 @@ es:
   controllers:
     repositories:
       destroy_error: "No se puede eliminar el repositorio"
+      review_assignments:
+        assign_error: "No se ha podido asignar el revisor"

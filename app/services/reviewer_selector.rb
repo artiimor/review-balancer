@@ -45,17 +45,25 @@ class ReviewerSelector
     top_tech if top_score&.positive?
   end
 
-  def self.assign_reviewer_remotely(pull_request, reviewer)
+  def self.assign_reviewer_remotely(pull_request, reviewer, previous_reviewers: [])
     if pull_request.repository.provider == 'gitlab'
       assign_reviewer_in_gitlab(pull_request, reviewer)
     else
-      assign_reviewer_in_github(pull_request, reviewer)
+      assign_reviewer_in_github(pull_request, reviewer, previous_reviewers)
     end
   end
 
-  def self.assign_reviewer_in_github(pull_request, reviewer)
+  def self.assign_reviewer_in_github(pull_request, reviewer, previous_reviewers = [])
     repository = pull_request.repository
     client = Octokit::Client.new(access_token: repository.user.configuration.github_access_token)
+
+    previous_logins = previous_reviewers.map(&:github_login) - [reviewer.github_login]
+    if previous_logins.any?
+      client.delete_pull_request_review_request(
+        repository.github_full_name, pull_request.github_number, reviewers: previous_logins
+      )
+    end
+
     client.request_pull_request_review(
       repository.github_full_name,
       pull_request.github_number,

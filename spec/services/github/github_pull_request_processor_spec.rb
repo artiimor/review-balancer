@@ -160,6 +160,20 @@ RSpec.describe Github::GithubPullRequestProcessor do
         reviewer = Contributor.find_by(github_login: reviewer_login)
         expect(repository.contributors.reload).to include(reviewer)
       end
+
+      it 'does nothing when the requested reviewer is already the one assigned (our own remote call echoing back)' do
+        pull_request = create(:pull_request, github_number: payload['pull_request']['number'], repository: repository)
+        same_reviewer = create(:contributor, github_login: reviewer_login)
+        existing_assignment = create(:review_assignment, pull_request: pull_request, reviewer: same_reviewer,
+                                                         completed_at: nil, source: 'auto')
+
+        expect do
+          described_class.call(repository, payload, github_access_token)
+        end.not_to change(ReviewAssignment, :count)
+
+        expect(existing_assignment.reload.completed_at).to be_nil
+        expect(existing_assignment.reload.source).to eq('auto')
+      end
     end
 
     context 'when the action is closed and the PR was merged' do

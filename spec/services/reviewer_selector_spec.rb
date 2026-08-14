@@ -182,4 +182,45 @@ RSpec.describe ReviewerSelector do
 
     expect(assignment).to be_nil
   end
+
+  describe '.assign_reviewer_remotely' do
+    it 'removes the review request from the previous GitHub reviewer before requesting the new one' do
+      pr = open_pr_touching('Ruby')
+
+      expect_any_instance_of(Octokit::Client).to receive(:delete_pull_request_review_request)
+        .with(repository.github_full_name, pr.github_number, reviewers: [novato.github_login])
+      expect_any_instance_of(Octokit::Client).to receive(:request_pull_request_review)
+        .with(repository.github_full_name, pr.github_number, reviewers: [experta_ruby.github_login])
+
+      described_class.assign_reviewer_remotely(pr, experta_ruby, previous_reviewers: [novato])
+    end
+
+    it 'does not try to remove anyone on GitHub when there is no previous reviewer' do
+      pr = open_pr_touching('Ruby')
+
+      expect_any_instance_of(Octokit::Client).not_to receive(:delete_pull_request_review_request)
+
+      described_class.assign_reviewer_remotely(pr, experta_ruby)
+    end
+
+    it 'does not remove the new reviewer if they were already the one requested' do
+      pr = open_pr_touching('Ruby')
+
+      expect_any_instance_of(Octokit::Client).not_to receive(:delete_pull_request_review_request)
+
+      described_class.assign_reviewer_remotely(pr, experta_ruby, previous_reviewers: [experta_ruby])
+    end
+
+    it 'replaces the full reviewer list on GitLab in one call, so no separate removal is needed there' do
+      repository.update!(provider: 'gitlab')
+      pr = open_pr_touching('Ruby')
+      gitlab_client = instance_double(Gitlab::Client, users: [double(id: 99)], update_merge_request: true)
+      allow(Gitlab).to receive(:client).and_return(gitlab_client)
+
+      described_class.assign_reviewer_remotely(pr, experta_ruby, previous_reviewers: [novato])
+
+      expect(gitlab_client).to have_received(:update_merge_request)
+        .with(repository.github_full_name, pr.github_number, reviewer_ids: [99])
+    end
+  end
 end

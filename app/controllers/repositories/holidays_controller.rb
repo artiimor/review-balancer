@@ -19,7 +19,7 @@ module Repositories
       if @holiday.save
         render turbo_stream: holiday_created_streams
       else
-        render turbo_stream: turbo_stream.replace('holiday-modal',
+        render turbo_stream: turbo_stream.replace('holiday-modal-content',
                                                   partial: 'repositories/holidays/modal',
                                                   locals: { holiday: @holiday })
       end
@@ -33,12 +33,12 @@ module Repositories
       @holiday = @contributor.holidays.find(params[:id])
 
       if @holiday.update(holiday_params)
-        render turbo_stream: [turbo_stream.remove('holiday-modal'),
+        render turbo_stream: [turbo_stream.remove('holiday-modal-content'),
                               turbo_stream.replace(@holiday,
                                                    partial: 'repositories/holidays/holiday',
                                                    locals: { holiday: @holiday })]
       else
-        render turbo_stream: turbo_stream.replace('holiday-modal',
+        render turbo_stream: turbo_stream.replace('holiday-modal-content',
                                                   partial: 'repositories/holidays/modal',
                                                   locals: { holiday: @holiday })
       end
@@ -63,7 +63,7 @@ module Repositories
     end
 
     def holiday_created_streams
-      [turbo_stream.remove('holiday-modal'),
+      [turbo_stream.remove('holiday-modal-content'),
        turbo_stream.remove('no-holidays'),
        turbo_stream.append('holidays',
                            partial: 'repositories/holidays/holiday',

@@ -91,7 +91,7 @@ RSpec.describe 'Holidays', type: :request do
       get new_repository_contributor_holiday_path(repository, contributor)
 
       expect(response).to have_http_status(:ok)
-      expect(response.body).to include('id="holiday-modal"')
+      expect(response.body).to include('id="holiday-modal-content"')
       expect(response.body).to include(repository_contributor_holidays_path(repository, contributor))
     end
   end
@@ -113,7 +113,7 @@ RSpec.describe 'Holidays', type: :request do
         end.to change { contributor.holidays.count }.by(1)
 
         expect(response).to have_http_status(:ok)
-        expect(response.body).to include('action="remove"', 'target="holiday-modal"')
+        expect(response.body).to include('action="remove"', 'target="holiday-modal-content"')
         expect(response.body).to include('action="append"', 'target="holidays"')
         expect(response.body).to include('2026-06-01', '2026-06-10')
       end
@@ -138,7 +138,7 @@ RSpec.describe 'Holidays', type: :request do
         end.not_to change(Holiday, :count)
 
         expect(response).to have_http_status(:ok)
-        expect(response.body).to include('action="replace"', 'target="holiday-modal"')
+        expect(response.body).to include('action="replace"', 'target="holiday-modal-content"')
         expect(response.body).to include('role="alert"')
       end
     end
@@ -180,7 +180,7 @@ RSpec.describe 'Holidays', type: :request do
       get edit_repository_contributor_holiday_path(repository, contributor, holiday)
 
       expect(response).to have_http_status(:ok)
-      expect(response.body).to include('id="holiday-modal"')
+      expect(response.body).to include('id="holiday-modal-content"')
       expect(response.body).to include('2026-01-05', '2026-01-10')
       expect(response.body).to include(repository_contributor_holiday_path(repository, contributor, holiday))
     end
@@ -213,7 +213,7 @@ RSpec.describe 'Holidays', type: :request do
               headers: headers
 
         expect(response).to have_http_status(:ok)
-        expect(response.body).to include('action="remove"', 'target="holiday-modal"')
+        expect(response.body).to include('action="remove"', 'target="holiday-modal-content"')
         expect(response.body).to include('action="replace"', "target=\"holiday_#{holiday.id}\"")
         expect(response.body).to include('2026-02-01', '2026-02-05')
         expect(holiday.reload.start_date.to_date).to eq(Date.new(2026, 2, 1))
@@ -227,7 +227,7 @@ RSpec.describe 'Holidays', type: :request do
               headers: headers
 
         expect(response).to have_http_status(:ok)
-        expect(response.body).to include('action="replace"', 'target="holiday-modal"')
+        expect(response.body).to include('action="replace"', 'target="holiday-modal-content"')
         expect(response.body).to include('role="alert"')
         expect(holiday.reload.start_date.to_date).to eq(Date.new(2026, 1, 5))
       end

@@ -153,6 +153,20 @@ RSpec.describe Gitlab::GitlabPullRequestProcessor do
 
         expect(previous_assignment.reload.completed_at).not_to be_nil
       end
+
+      it 'does nothing when the requested reviewer is already the one assigned (our own remote call echoing back)' do
+        pull_request = create(:pull_request, github_number: payload['object_attributes']['iid'], repository: repository)
+        same_reviewer = create(:contributor, github_login: reviewer_login)
+        existing_assignment = create(:review_assignment, pull_request: pull_request, reviewer: same_reviewer,
+                                                         completed_at: nil, source: 'auto')
+
+        expect do
+          described_class.call(repository, payload, gitlab_access_token)
+        end.not_to change(ReviewAssignment, :count)
+
+        expect(existing_assignment.reload.completed_at).to be_nil
+        expect(existing_assignment.reload.source).to eq('auto')
+      end
     end
 
     context 'when the merge request is updated without a reviewer change' do
