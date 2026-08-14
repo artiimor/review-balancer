@@ -16,7 +16,9 @@ class Contributor < ApplicationRecord
 
   scope :not_in_holidays, -> { where.not(id: Holiday.current.select(:contributor_id)) }
 
-  def current_review_load
-    review_assignments.where(completed_at: nil).count
+  def current_review_load(repository_id)
+    review_assignments.joins(:pull_request)
+                       .where(pull_requests: { repository_id: repository_id }, completed_at: nil)
+                       .count
   end
 end

@@ -70,17 +70,51 @@ RSpec.describe Contributor do
   describe '#current_review_load' do
     it 'is zero when there are no review_assignments' do
       contributor = create(:contributor)
+      repository = create(:repository)
 
-      expect(contributor.current_review_load).to eq(0)
+      expect(contributor.current_review_load(repository.id)).to eq(0)
     end
 
-    it 'counts only review_assignments without completed_at' do
+    it 'counts only review_assignments without completed_at for the given repository' do
       contributor = create(:contributor)
-      create(:review_assignment, reviewer: contributor, completed_at: nil)
-      create(:review_assignment, reviewer: contributor, completed_at: nil)
-      create(:review_assignment, reviewer: contributor, completed_at: Time.current)
+      repository = create(:repository)
+      other_repository = create(:repository)
+      pull_request = create(:pull_request, repository: repository)
+      other_pull_request = create(:pull_request, repository: repository)
+      other_repo_pull_request = create(:pull_request, repository: other_repository)
 
-      expect(contributor.current_review_load).to eq(2)
+      create(:review_assignment, reviewer: contributor, pull_request: pull_request, completed_at: nil)
+      create(:review_assignment, reviewer: contributor, pull_request: other_pull_request, completed_at: nil)
+      create(:review_assignment, reviewer: contributor, pull_request: pull_request, completed_at: Time.current)
+      create(:review_assignment, reviewer: contributor, pull_request: other_repo_pull_request, completed_at: nil)
+
+      expect(contributor.current_review_load(repository.id)).to eq(2)
+    end
+
+    it 'is independent per repository for the same contributor' do
+      contributor = create(:contributor)
+      repo_a = create(:repository)
+      repo_b = create(:repository)
+      pr_in_a = create(:pull_request, repository: repo_a)
+      pr_in_b = create(:pull_request, repository: repo_b)
+
+      create(:review_assignment, reviewer: contributor, pull_request: pr_in_a, completed_at: nil)
+      create(:review_assignment, reviewer: contributor, pull_request: pr_in_a, completed_at: nil)
+      create(:review_assignment, reviewer: contributor, pull_request: pr_in_b, completed_at: nil)
+
+      expect(contributor.current_review_load(repo_a.id)).to eq(2)
+      expect(contributor.current_review_load(repo_b.id)).to eq(1)
+    end
+
+    it 'does not change load in one repository when a new assignment is created in another' do
+      contributor = create(:contributor)
+      repo_a = create(:repository)
+      repo_b = create(:repository)
+      pr_in_a = create(:pull_request, repository: repo_a)
+
+      create(:review_assignment, reviewer: contributor, pull_request: pr_in_a, completed_at: nil)
+      expect { create(:review_assignment, reviewer: contributor, pull_request: create(:pull_request, repository: repo_b), completed_at: nil) }
+        .not_to(change { contributor.current_review_load(repo_a.id) })
     end
   end
 end

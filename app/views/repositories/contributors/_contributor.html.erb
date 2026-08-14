@@ -14,7 +14,7 @@
       </svg>
     <% end %>
   </td>
-  <td class="whitespace-nowrap px-6 py-4 text-slate-600 dark:text-slate-400"><%= contributor.current_review_load %></td>
+  <td class="whitespace-nowrap px-6 py-4 text-slate-600 dark:text-slate-400"><%= contributor.current_review_load(@repository.id) %></td>
   <td class="px-6 py-4 text-slate-600 dark:text-slate-400">
     <span class="text-slate-400 dark:text-slate-500"><%= contributor.created_at %></span>
   </td>

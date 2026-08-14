@@ -27,7 +27,7 @@ class RepositoryDashboardData
   end
 
   def pending_reviews_by_contributor
-    contributors.map { |c| Bar.new(contributor: c, pending_reviews: c.current_review_load) }
+    contributors.map { |c| Bar.new(contributor: c, pending_reviews: c.current_review_load(@repository.id)) }
   end
 
   def techs

@@ -12,7 +12,7 @@ class ReviewerSelector
 
     ranked = candidates.map do |contributor|
       expertise = ExpertiseCalculator.score_for_techs(contributor, techs, repository)
-      load_ = contributor.current_review_load
+      load_ = contributor.current_review_load(pull_request.repository.id)
       score = expertise / (1 + load_)
 
       { contributor: contributor, expertise: expertise, load: load_, score: score }
