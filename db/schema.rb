@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_08_11_091448) do
+ActiveRecord::Schema[7.2].define(version: 2026_08_14_092906) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -108,6 +108,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_08_11_091448) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "matched_tech"
+    t.string "source", default: "auto", null: false
     t.index ["pull_request_id"], name: "index_review_assignments_on_pull_request_id"
     t.index ["reviewer_id"], name: "index_review_assignments_on_reviewer_id"
   end

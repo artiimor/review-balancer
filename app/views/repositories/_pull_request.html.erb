@@ -7,7 +7,9 @@
     <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-medium <%= pull_request_state_badge_classes(pull_request.state) %>"><%= t("views.repositories.pull_request.states.#{pull_request.state}", default: pull_request.state) %></span>
   </td>
   <td class="whitespace-nowrap px-6 py-4 text-slate-600 dark:text-slate-400"><%= assignment&.reviewer&.github_login || t('views.repositories.pull_request.unassigned') %></td>
-  <td class="whitespace-nowrap px-6 py-4 text-slate-500 dark:text-slate-400"><%= assignment&.matched_tech || (assignment ? t('views.repositories.pull_request.availability') : "—") %></td>
+  <td class="whitespace-nowrap px-6 py-4 text-slate-500 dark:text-slate-400">
+    <%= assignment&.matched_tech || (assignment&.source == 'manual' ? t('views.repositories.pull_request.manually_assigned') : (assignment ? t('views.repositories.pull_request.availability') : "—")) %>
+  </td>
   <td class="whitespace-nowrap px-6 py-4 text-slate-500 dark:text-slate-400">
     <% if assignment %>
       <%= distance_of_time_in_words(assignment.assigned_at, assignment.review_duration_end) %><%= t('views.repositories.pull_request.in_progress_suffix') unless assignment.completed_at %>

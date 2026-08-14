@@ -59,7 +59,7 @@ RSpec.describe 'Webhooks', type: :request do
     expect(response).to have_http_status(:ok)
   end
 
-  it 'returns 200 without enqueuing a job for pull_request actions other than opened/closed' do
+  it 'returns 200 without enqueuing a job for pull_request actions other than opened/closed/review_requested' do
     body = raw_body.sub('"action": "opened"', '"action": "synchronize"')
     signature = signature_for(body, 's3cr3t')
 
@@ -72,6 +72,23 @@ RSpec.describe 'Webhooks', type: :request do
              'X-Hub-Signature-256' => signature
            }
     end.not_to have_enqueued_job(ProcessPullRequestJob)
+
+    expect(response).to have_http_status(:ok)
+  end
+
+  it 'enqueues a job for the review_requested action, so manual reviewer changes can be picked up' do
+    body = raw_body.sub('"action": "opened"', '"action": "review_requested"')
+    signature = signature_for(body, 's3cr3t')
+
+    expect do
+      post '/webhooks/github',
+           params: body,
+           headers: {
+             'Content-Type' => 'application/json',
+             'X-GitHub-Event' => 'pull_request',
+             'X-Hub-Signature-256' => signature
+           }
+    end.to have_enqueued_job(ProcessPullRequestJob)
 
     expect(response).to have_http_status(:ok)
   end
@@ -139,12 +156,22 @@ RSpec.describe 'Webhooks', type: :request do
       expect(response).to have_http_status(:ok)
     end
 
-    it 'returns 200 without enqueuing a job for merge request actions other than open/close/merge' do
-      body = gitlab_body.sub('"action": "open"', '"action": "update"')
+    it 'returns 200 without enqueuing a job for merge request actions other than open/close/merge/update' do
+      body = gitlab_body.sub('"action": "open"', '"action": "approved"')
 
       expect do
         post_gitlab_webhook(body: body, token: 's3cr3t')
       end.not_to have_enqueued_job(ProcessPullRequestJob)
+
+      expect(response).to have_http_status(:ok)
+    end
+
+    it 'enqueues a job for the update action, so reviewer changes can be picked up' do
+      body = gitlab_body.sub('"action": "open"', '"action": "update"')
+
+      expect do
+        post_gitlab_webhook(body: body, token: 's3cr3t')
+      end.to have_enqueued_job(ProcessPullRequestJob)
 
       expect(response).to have_http_status(:ok)
     end

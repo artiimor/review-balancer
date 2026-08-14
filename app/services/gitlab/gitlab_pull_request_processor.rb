@@ -26,6 +26,8 @@ module Gitlab
         finalize(pull_request, state: 'merged', merged_at: attrs['updated_at'])
       when 'close'
         finalize(pull_request, state: 'closed')
+      when 'update'
+        handle_review_requested(pull_request) if payload.dig('changes', 'reviewers').present?
       end
     end
 
@@ -49,11 +51,23 @@ module Gitlab
       ReviewAssignment.create!(pull_request: pull_request, reviewer: reviewer, assigned_at: Time.current)
     end
 
-    def finalize(pull_request, state:, merged_at: nil)
-      pull_request.update!(state: state, merged_at: merged_at)
-      record_file_changes(pull_request) if state == 'merged'
+    def handle_review_requested(pull_request)
+      username = payload['reviewers']&.first&.dig('username')
+      return if username.blank?
+
+      reviewer = Contributor.find_or_create_by!(github_login: username)
+      RepositoryContributor.find_or_create_by!(repository: repository, contributor: reviewer)
 
       pull_request.review_assignments.where(completed_at: nil).find_each(&:complete!)
+      ReviewAssignment.create!(
+        pull_request: pull_request, reviewer: reviewer, assigned_at: Time.current, source: 'manual'
+      )
+    end
+
+    def finalize(pull_request, state:, merged_at: nil)
+      pull_request.update!(state: state, merged_at: merged_at)
+      pull_request.review_assignments.where(completed_at: nil).find_each(&:complete!)
+      record_file_changes(pull_request) if state == 'merged'
     end
 
     def record_file_changes(pull_request)

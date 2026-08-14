@@ -106,6 +106,7 @@ en:
       pull_request:
         unassigned: "Unassigned"
         availability: "Availability"
+        manually_assigned: "Manually assigned"
         in_progress_suffix: " (in progress)"
         states:
           open: "open"

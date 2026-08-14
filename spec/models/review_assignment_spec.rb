@@ -3,6 +3,16 @@
 require 'rails_helper'
 
 RSpec.describe ReviewAssignment do
+  describe 'associations' do
+    it { is_expected.to belong_to(:pull_request) }
+    it { is_expected.to belong_to(:reviewer) }
+  end
+
+  describe 'validations' do
+    it { is_expected.to validate_presence_of(:assigned_at) }
+    it { is_expected.to validate_inclusion_of(:source).in_array(%w[auto manual]) }
+  end
+
   describe '#complete!' do
     it 'sets completed_at when it was not completed yet' do
       assignment = create(:review_assignment, completed_at: nil)

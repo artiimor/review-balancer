@@ -40,7 +40,7 @@ class WebhooksController < ApplicationController
 
   def github_merge_request_event?
     event = request.headers['X-GitHub-Event']
-    event == 'pull_request' && %w[opened closed].include?(payload['action'])
+    event == 'pull_request' && %w[opened closed review_requested].include?(payload['action'])
   end
 
   def valid_gitlab_signature?(repository)
@@ -52,7 +52,7 @@ class WebhooksController < ApplicationController
 
   def gitlab_merge_request_event?
     request.headers['X-Gitlab-Event'] == 'Merge Request Hook' &&
-      %w[open close merge].include?(payload.dig('object_attributes', 'action'))
+      %w[open close merge update].include?(payload.dig('object_attributes', 'action'))
   end
 
   def raw_body

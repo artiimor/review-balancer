@@ -130,6 +130,46 @@ RSpec.describe Gitlab::GitlabPullRequestProcessor do
       end
     end
 
+    context 'when a reviewer is manually changed on an already open merge request' do
+      let(:payload) { JSON.parse(file_fixture('gitlab_merge_request_reviewer_updated.json').read) }
+      let(:reviewer_login) { payload['reviewers'].first['username'] }
+
+      it 'creates a manual review_assignment for the newly requested reviewer' do
+        pull_request = create(:pull_request, github_number: payload['object_attributes']['iid'], repository: repository)
+        create(:review_assignment, pull_request: pull_request, completed_at: nil)
+
+        described_class.call(repository, payload, gitlab_access_token)
+
+        assignment = pull_request.reload.current_review_assignment
+        expect(assignment.reviewer.github_login).to eq(reviewer_login)
+        expect(assignment.source).to eq('manual')
+      end
+
+      it 'completes the previous pending review_assignment' do
+        pull_request = create(:pull_request, github_number: payload['object_attributes']['iid'], repository: repository)
+        previous_assignment = create(:review_assignment, pull_request: pull_request, completed_at: nil)
+
+        described_class.call(repository, payload, gitlab_access_token)
+
+        expect(previous_assignment.reload.completed_at).not_to be_nil
+      end
+    end
+
+    context 'when the merge request is updated without a reviewer change' do
+      let(:payload) do
+        JSON.parse(file_fixture('gitlab_merge_request_reviewer_updated.json').read).tap { |p| p.delete('changes') }
+      end
+
+      it 'does not create a new review_assignment' do
+        pull_request = create(:pull_request, github_number: payload['object_attributes']['iid'], repository: repository)
+        create(:review_assignment, pull_request: pull_request, completed_at: nil)
+
+        expect do
+          described_class.call(repository, payload, gitlab_access_token)
+        end.not_to change(ReviewAssignment, :count)
+      end
+    end
+
     context 'when the action is merge' do
       let(:payload) { JSON.parse(file_fixture('gitlab_merge_request_merged.json').read) }
       let(:changed_file) { double(new_path: 'app/models/user.rb', old_path: nil, diff: "+added\n-removed\n unchanged") }

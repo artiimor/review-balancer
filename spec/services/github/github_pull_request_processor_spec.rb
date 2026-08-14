@@ -128,6 +128,40 @@ RSpec.describe Github::GithubPullRequestProcessor do
       end
     end
 
+    context 'when a reviewer is manually requested on an already open PR' do
+      let(:payload) { JSON.parse(file_fixture('github_pull_request_review_requested.json').read) }
+      let(:reviewer_login) { payload['requested_reviewer']['login'] }
+
+      it 'creates a manual review_assignment for the newly requested reviewer' do
+        pull_request = create(:pull_request, github_number: payload['pull_request']['number'], repository: repository)
+        create(:review_assignment, pull_request: pull_request, completed_at: nil)
+
+        described_class.call(repository, payload, github_access_token)
+
+        assignment = pull_request.reload.current_review_assignment
+        expect(assignment.reviewer.github_login).to eq(reviewer_login)
+        expect(assignment.source).to eq('manual')
+      end
+
+      it 'completes the previous pending review_assignment' do
+        pull_request = create(:pull_request, github_number: payload['pull_request']['number'], repository: repository)
+        previous_assignment = create(:review_assignment, pull_request: pull_request, completed_at: nil)
+
+        described_class.call(repository, payload, github_access_token)
+
+        expect(previous_assignment.reload.completed_at).not_to be_nil
+      end
+
+      it 'links the reviewer to the repository so they show up as a contributor' do
+        create(:pull_request, github_number: payload['pull_request']['number'], repository: repository)
+
+        described_class.call(repository, payload, github_access_token)
+
+        reviewer = Contributor.find_by(github_login: reviewer_login)
+        expect(repository.contributors.reload).to include(reviewer)
+      end
+    end
+
     context 'when the action is closed and the PR was merged' do
       let(:payload) { JSON.parse(file_fixture('github_pull_request_closed_merged.json').read) }
       let(:files) do

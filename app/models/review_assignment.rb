@@ -5,6 +5,7 @@ class ReviewAssignment < ApplicationRecord
   belongs_to :reviewer, class_name: 'Contributor'
 
   validates :assigned_at, presence: true
+  validates :source, inclusion: { in: %w[auto manual] }
 
   def complete!
     update!(completed_at: Time.zone.now) unless completed_at

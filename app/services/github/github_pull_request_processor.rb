@@ -25,6 +25,8 @@ module Github
         handle_opened(pull_request, pr_data)
       when 'closed'
         handle_closed(pull_request, pr_data)
+      when 'review_requested'
+        handle_review_requested(pull_request)
       end
     end
 
@@ -48,15 +50,31 @@ module Github
       ReviewAssignment.create!(pull_request: pull_request, reviewer: reviewer, assigned_at: Time.current)
     end
 
+    def handle_review_requested(pull_request)
+      login = payload.dig('requested_reviewer', 'login')
+      return if login.blank?
+
+      reviewer = Contributor.find_or_create_by!(github_login: login)
+      RepositoryContributor.find_or_create_by!(repository: repository, contributor: reviewer)
+
+      pull_request.review_assignments.where(completed_at: nil).find_each(&:complete!)
+      ReviewAssignment.create!(
+        pull_request: pull_request,
+        reviewer: reviewer,
+        assigned_at: Time.current,
+        source: 'manual'
+      )
+    end
+
     def handle_closed(pull_request, pr_data)
       if pr_data['merged']
         pull_request.update!(state: 'merged', merged_at: pr_data['merged_at'])
-        record_file_changes(pull_request)
       else
         pull_request.update!(state: 'closed')
       end
 
       pull_request.review_assignments.where(completed_at: nil).find_each(&:complete!)
+      record_file_changes(pull_request) if pr_data['merged']
     end
 
     def record_file_changes(pull_request)
