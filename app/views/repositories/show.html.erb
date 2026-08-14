@@ -23,6 +23,8 @@
     </div>
   </div>
 
+  <%= turbo_stream_from @repository.pull_requests_stream_name %>
+
   <div id="general_error">
     <%= render partial: 'repositories/error_message', locals: { message: nil } %>
   </div>

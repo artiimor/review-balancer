@@ -24,6 +24,8 @@ Rails.application.routes.draw do
   # Health check para el load balancer / docker healthcheck.
   get 'up' => 'rails/health#show', as: :rails_health_check
 
+  mount ActionCable.server => '/cable'
+
   Rails.application.routes.draw do
     get 'home/index'
     devise_for :users, controllers: {

@@ -18,4 +18,8 @@ class Repository < ApplicationRecord
     contributor_ids = repository_contributors.active.pluck(:contributor_id)
     Contributor.where(id: contributor_ids)
   end
+
+  def pull_requests_stream_name
+    "repository_#{id}_pull_requests"
+  end
 end

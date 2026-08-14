@@ -47,4 +47,39 @@ RSpec.describe ReviewAssignment do
       end
     end
   end
+
+  describe 'broadcasting' do
+    it "broadcasts a replace of the pull_request row to the repository's stream on create" do
+      repository = create(:repository)
+      pull_request = create(:pull_request, repository: repository)
+
+      expect { create(:review_assignment, pull_request: pull_request) }
+        .to(have_broadcasted_to(repository.pull_requests_stream_name)
+        .with { |html| expect(html).to include('action="replace"', "target=\"pull_request_#{pull_request.id}\"") })
+    end
+
+    it 'broadcasts again when the assignment is completed' do
+      repository = create(:repository)
+      pull_request = create(:pull_request, repository: repository)
+      assignment = create(:review_assignment, pull_request: pull_request, completed_at: nil)
+
+      expect { assignment.complete! }
+        .to(have_broadcasted_to(repository.pull_requests_stream_name)
+        .with { |html| expect(html).to include('action="replace"', "target=\"pull_request_#{pull_request.id}\"") })
+    end
+
+    it 'uses fresh data from the database, not a stale cached association, so sibling changes are reflected' do
+      repository = create(:repository)
+      pull_request = create(:pull_request, repository: repository)
+      first_reviewer = create(:contributor, github_login: 'first_reviewer')
+      second_reviewer = create(:contributor, github_login: 'second_reviewer')
+
+      previous = create(:review_assignment, pull_request: pull_request, reviewer: first_reviewer, completed_at: nil)
+      previous.complete!
+
+      expect { create(:review_assignment, pull_request: pull_request, reviewer: second_reviewer) }
+        .to(have_broadcasted_to(repository.pull_requests_stream_name)
+        .with { |html| expect(html).to include('second_reviewer') })
+    end
+  end
 end
