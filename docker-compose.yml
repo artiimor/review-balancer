@@ -25,7 +25,7 @@ services:
   web:
     build: .
     ports:
-      - "3050:3000"
+      - "3000:3000"
     env_file: .env
     environment:
       DATABASE_HOST: db
