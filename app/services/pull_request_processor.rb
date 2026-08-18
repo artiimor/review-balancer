@@ -6,7 +6,6 @@ class PullRequestProcessor
   end
 
   def initialize(repository_id, payload)
-    # TODO: controlar que no sean nil, y loggear un error si lo son
     @repository_id = repository_id
     @payload = payload
   end
@@ -14,13 +13,11 @@ class PullRequestProcessor
   def call
     if repository_id.blank?
       Rails.logger.error("PullRequestProcessor: repository_id is blank. Payload: #{payload}")
-      # TODO: add logs with Sentry or papertrail
       return
     end
 
     if payload.blank?
       Rails.logger.error("PullRequestProcessor: payload is blank. Repository ID: #{repository_id}")
-      # TODO: add logs with Sentry or papertrail
       return
     end
 

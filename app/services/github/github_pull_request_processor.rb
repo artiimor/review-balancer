@@ -12,8 +12,6 @@ module Github
     end
 
     def call
-      # TODO: control de errores cuando faltan estas claves en el payload
-      # TODO el scope jode los repetidos
       pr_data = payload['pull_request']
 
       author = Contributor.find_or_create_by!(github_login: pr_data['user']['login'])

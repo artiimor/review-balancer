@@ -7,7 +7,6 @@ module Gitlab
     end
 
     def initialize(repository)
-      # TODO: asegurarnos que no son nil
       @repository = repository
     end
 

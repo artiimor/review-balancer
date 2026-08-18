@@ -12,7 +12,6 @@ module Gitlab
     end
 
     def call
-      # TODO: control de errores cuando faltan estas claves en el payload
       attrs = payload['object_attributes']
 
       author = Contributor.find_or_create_by!(github_login: payload.dig('user', 'username'))
