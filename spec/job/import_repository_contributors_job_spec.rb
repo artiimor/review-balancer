@@ -4,20 +4,20 @@ require 'rails_helper'
 
 RSpec.describe ImportRepositoryContributorsJob, type: :job do
   describe '#perform' do
-    it 'calls GithubContributorsImporter with the correct repository and access token' do
+    it 'calls GithubContributorsImporter with the repository' do
       repository = create(:repository, provider: 'github')
 
-      expect(Github::GithubContributorsImporter).to receive(:call).with(repository, 'ghp_test_token')
+      expect(Github::GithubContributorsImporter).to receive(:call).with(repository)
 
-      described_class.new.perform(repository.id, 'ghp_test_token')
+      described_class.new.perform(repository.id)
     end
 
-    it 'calls GitlabContributorsImporter with the correct repository and access token' do
+    it 'calls GitlabContributorsImporter with the repository' do
       repository = create(:repository, provider: 'gitlab')
 
-      expect(Gitlab::GitlabContributorsImporter).to receive(:call).with(repository, 'glpat_test_token')
+      expect(Gitlab::GitlabContributorsImporter).to receive(:call).with(repository)
 
-      described_class.new.perform(repository.id, 'glpat_test_token')
+      described_class.new.perform(repository.id)
     end
   end
 end

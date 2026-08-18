@@ -2,14 +2,13 @@
 
 module Gitlab
   class GitlabContributorsImporter
-    def self.call(repository, gitlab_access_token)
-      new(repository, gitlab_access_token).call
+    def self.call(repository)
+      new(repository).call
     end
 
-    def initialize(repository, gitlab_access_token)
+    def initialize(repository)
       # TODO asegurarnos que no son nil
       @repository = repository
-      @gitlab_access_token = gitlab_access_token
     end
 
     def call
@@ -25,7 +24,7 @@ module Gitlab
 
     def gitlab_client
       @gitlab_client ||= ::Gitlab.client(
-        endpoint: repository.user.configuration.gitlab_api_endpoint, private_token: @gitlab_access_token
+        endpoint: repository.user.configuration.gitlab_api_endpoint, private_token: repository.access_token
       )
     end
   end

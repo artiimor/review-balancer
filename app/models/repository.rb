@@ -22,4 +22,9 @@ class Repository < ApplicationRecord
   def pull_requests_stream_name
     "repository_#{id}_pull_requests"
   end
+
+  def access_token
+    configuration = user.configuration
+    provider == 'gitlab' ? configuration&.gitlab_access_token : configuration&.github_access_token
+  end
 end

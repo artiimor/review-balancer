@@ -4,7 +4,6 @@ require 'rails_helper'
 
 RSpec.describe Gitlab::GitlabPullRequestProcessor do
   let(:repository) { create(:repository, provider: 'gitlab') }
-  let(:gitlab_access_token) { 'fake_token' }
 
   describe '.call' do
     context 'when the action is open' do
@@ -21,7 +20,7 @@ RSpec.describe Gitlab::GitlabPullRequestProcessor do
         expect(Contributor.find_by(github_login: contributor_login)).to be_nil
 
         expect do
-          described_class.call(repository, payload, gitlab_access_token)
+          described_class.call(repository, payload)
         end.to change(Contributor, :count).by(1)
 
         expect(Contributor.find_by(github_login: contributor_login)).to be_present
@@ -31,7 +30,7 @@ RSpec.describe Gitlab::GitlabPullRequestProcessor do
         existing_contributor = create(:contributor, github_login: contributor_login)
 
         expect do
-          described_class.call(repository, payload, gitlab_access_token)
+          described_class.call(repository, payload)
         end.not_to change(Contributor, :count)
 
         pull_request = PullRequest.find_by(github_number: payload['object_attributes']['iid'], repository: repository)
@@ -40,7 +39,7 @@ RSpec.describe Gitlab::GitlabPullRequestProcessor do
 
       it 'creates the pull_request with the values from the merge request' do
         expect do
-          described_class.call(repository, payload, gitlab_access_token)
+          described_class.call(repository, payload)
         end.to change(PullRequest, :count).by(1)
 
         pull_request = PullRequest.find_by(github_number: payload['object_attributes']['iid'], repository: repository)
@@ -54,7 +53,7 @@ RSpec.describe Gitlab::GitlabPullRequestProcessor do
         create(:pull_request, github_number: payload['object_attributes']['iid'], repository: repository)
 
         expect do
-          described_class.call(repository, payload, gitlab_access_token)
+          described_class.call(repository, payload)
         end.not_to change(PullRequest, :count)
       end
 
@@ -63,14 +62,14 @@ RSpec.describe Gitlab::GitlabPullRequestProcessor do
         create(:review_assignment, pull_request: pull_request)
 
         expect do
-          described_class.call(repository, payload, gitlab_access_token)
+          described_class.call(repository, payload)
         end.not_to change(ReviewAssignment, :count)
 
         expect(ReviewerSelector).not_to have_received(:assign!)
       end
 
       it 'calls ReviewerSelector.assign!' do
-        described_class.call(repository, payload, gitlab_access_token)
+        described_class.call(repository, payload)
 
         expect(ReviewerSelector).to have_received(:assign!).with(instance_of(PullRequest))
       end
@@ -81,17 +80,17 @@ RSpec.describe Gitlab::GitlabPullRequestProcessor do
         allow(Gitlab).to receive(:client).and_return(client)
         expect(client).to receive(:merge_request_changes).with(repository.github_full_name, 42).and_return(changes)
 
-        described_class.call(repository, payload, gitlab_access_token)
+        described_class.call(repository, payload)
       end
 
       it "uses the repository owner's configured GitLab URL when building the client" do
         repository.user.configuration.update!(gitlab_url: 'https://gitlab.example.com')
         client = instance_double(Gitlab::Client, merge_request_changes: double(changes: []))
         expect(Gitlab).to receive(:client)
-          .with(endpoint: 'https://gitlab.example.com/api/v4', private_token: gitlab_access_token)
+          .with(endpoint: 'https://gitlab.example.com/api/v4', private_token: repository.access_token)
           .and_return(client)
 
-        described_class.call(repository, payload, gitlab_access_token)
+        described_class.call(repository, payload)
       end
     end
 
@@ -107,7 +106,7 @@ RSpec.describe Gitlab::GitlabPullRequestProcessor do
       it 'creates a review_assignment for the already-requested reviewer instead of running the selector' do
         expect(ReviewerSelector).not_to receive(:assign!)
 
-        described_class.call(repository, payload, gitlab_access_token)
+        described_class.call(repository, payload)
 
         pull_request = PullRequest.find_by(github_number: payload['object_attributes']['iid'], repository: repository)
         assignment = pull_request.current_review_assignment
@@ -117,13 +116,13 @@ RSpec.describe Gitlab::GitlabPullRequestProcessor do
       it 'creates the reviewer as a contributor if they do not exist yet' do
         expect(Contributor.find_by(github_login: reviewer_login)).to be_nil
 
-        described_class.call(repository, payload, gitlab_access_token)
+        described_class.call(repository, payload)
 
         expect(Contributor.find_by(github_login: reviewer_login)).to be_present
       end
 
       it 'links the reviewer to the repository so they show up as a contributor' do
-        described_class.call(repository, payload, gitlab_access_token)
+        described_class.call(repository, payload)
 
         reviewer = Contributor.find_by(github_login: reviewer_login)
         expect(repository.contributors.reload).to include(reviewer)
@@ -138,7 +137,7 @@ RSpec.describe Gitlab::GitlabPullRequestProcessor do
         pull_request = create(:pull_request, github_number: payload['object_attributes']['iid'], repository: repository)
         create(:review_assignment, pull_request: pull_request, completed_at: nil)
 
-        described_class.call(repository, payload, gitlab_access_token)
+        described_class.call(repository, payload)
 
         assignment = pull_request.reload.current_review_assignment
         expect(assignment.reviewer.github_login).to eq(reviewer_login)
@@ -149,7 +148,7 @@ RSpec.describe Gitlab::GitlabPullRequestProcessor do
         pull_request = create(:pull_request, github_number: payload['object_attributes']['iid'], repository: repository)
         previous_assignment = create(:review_assignment, pull_request: pull_request, completed_at: nil)
 
-        described_class.call(repository, payload, gitlab_access_token)
+        described_class.call(repository, payload)
 
         expect(previous_assignment.reload.completed_at).not_to be_nil
       end
@@ -161,7 +160,7 @@ RSpec.describe Gitlab::GitlabPullRequestProcessor do
                                                          completed_at: nil, source: 'auto')
 
         expect do
-          described_class.call(repository, payload, gitlab_access_token)
+          described_class.call(repository, payload)
         end.not_to change(ReviewAssignment, :count)
 
         expect(existing_assignment.reload.completed_at).to be_nil
@@ -179,7 +178,7 @@ RSpec.describe Gitlab::GitlabPullRequestProcessor do
         create(:review_assignment, pull_request: pull_request, completed_at: nil)
 
         expect do
-          described_class.call(repository, payload, gitlab_access_token)
+          described_class.call(repository, payload)
         end.not_to change(ReviewAssignment, :count)
       end
     end
@@ -198,7 +197,7 @@ RSpec.describe Gitlab::GitlabPullRequestProcessor do
       it 'sets the state to merged with the updated_at as merged_at' do
         pull_request = create(:pull_request, github_number: payload['object_attributes']['iid'], repository: repository)
 
-        described_class.call(repository, payload, gitlab_access_token)
+        described_class.call(repository, payload)
 
         pull_request.reload
         expect(pull_request.state).to eq('merged')
@@ -208,7 +207,7 @@ RSpec.describe Gitlab::GitlabPullRequestProcessor do
       it 'records the file changes' do
         create(:pull_request, github_number: payload['object_attributes']['iid'], repository: repository)
 
-        described_class.call(repository, payload, gitlab_access_token)
+        described_class.call(repository, payload)
 
         expect(FileChange.count).to eq(1)
         expect(FileChange.first.path).to eq('app/models/user.rb')
@@ -219,7 +218,7 @@ RSpec.describe Gitlab::GitlabPullRequestProcessor do
         pull_request = create(:pull_request, github_number: payload['object_attributes']['iid'], repository: repository)
         assignment = create(:review_assignment, pull_request: pull_request, completed_at: nil)
 
-        described_class.call(repository, payload, gitlab_access_token)
+        described_class.call(repository, payload)
 
         expect(assignment.reload.completed_at).not_to be_nil
       end
@@ -232,7 +231,7 @@ RSpec.describe Gitlab::GitlabPullRequestProcessor do
         pull_request = create(:pull_request, github_number: payload['object_attributes']['iid'], repository: repository)
         expect(Gitlab).not_to receive(:client)
 
-        described_class.call(repository, payload, gitlab_access_token)
+        described_class.call(repository, payload)
 
         expect(pull_request.reload.state).to eq('closed')
       end

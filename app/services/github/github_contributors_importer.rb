@@ -2,13 +2,12 @@
 
 module Github
   class GithubContributorsImporter
-    def self.call(repository, github_access_token)
-      new(repository, github_access_token).call
+    def self.call(repository)
+      new(repository).call
     end
 
-    def initialize(repository, github_access_token)
+    def initialize(repository)
       @repository = repository
-      @github_access_token = github_access_token
     end
 
     def call
@@ -23,7 +22,7 @@ module Github
     attr_reader :repository
 
     def github_client
-      @github_client ||= Octokit::Client.new(access_token: @github_access_token, auto_paginate: true)
+      @github_client ||= Octokit::Client.new(access_token: repository.access_token, auto_paginate: true)
     end
   end
 end

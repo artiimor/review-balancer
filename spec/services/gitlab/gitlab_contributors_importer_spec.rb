@@ -5,7 +5,6 @@ require 'rails_helper'
 RSpec.describe Gitlab::GitlabContributorsImporter do
   describe '.call' do
     let(:repository) { create(:repository, github_full_name: 'acme/checkout-api', provider: 'gitlab') }
-    let(:gitlab_access_token) { 'fake_token' }
 
     def gitlab_member(username)
       double(username: username)
@@ -23,14 +22,14 @@ RSpec.describe Gitlab::GitlabContributorsImporter do
     it 'creates a Contributor for each member returned by the GitLab API' do
       stub_team_members('alice', 'bob')
 
-      expect { described_class.call(repository, gitlab_access_token) }.to change(Contributor, :count).by(2)
+      expect { described_class.call(repository) }.to change(Contributor, :count).by(2)
       expect(Contributor.pluck(:github_login)).to contain_exactly('alice', 'bob')
     end
 
     it 'links each contributor to the repository via RepositoryContributor' do
       stub_team_members('alice')
 
-      described_class.call(repository, gitlab_access_token)
+      described_class.call(repository)
 
       contributor = Contributor.find_by(github_login: 'alice')
       expect(repository.repository_contributors.pluck(:contributor_id)).to contain_exactly(contributor.id)
@@ -40,7 +39,7 @@ RSpec.describe Gitlab::GitlabContributorsImporter do
       existing = create(:contributor, github_login: 'alice')
       stub_team_members('alice')
 
-      expect { described_class.call(repository, gitlab_access_token) }.not_to change(Contributor, :count)
+      expect { described_class.call(repository) }.not_to change(Contributor, :count)
       expect(repository.repository_contributors.pluck(:contributor_id)).to contain_exactly(existing.id)
     end
 
@@ -49,26 +48,26 @@ RSpec.describe Gitlab::GitlabContributorsImporter do
       create(:repository_contributor, repository: repository, contributor: contributor)
       stub_team_members('alice')
 
-      expect { described_class.call(repository, gitlab_access_token) }.not_to change(RepositoryContributor, :count)
+      expect { described_class.call(repository) }.not_to change(RepositoryContributor, :count)
     end
 
     it "uses the repository owner's configured GitLab URL when building the client" do
       repository.user.configuration.update!(gitlab_url: 'https://gitlab.example.com')
       paginated = double(auto_paginate: nil)
       expect(Gitlab).to receive(:client)
-        .with(endpoint: 'https://gitlab.example.com/api/v4', private_token: gitlab_access_token)
+        .with(endpoint: 'https://gitlab.example.com/api/v4', private_token: repository.access_token)
         .and_return(instance_double(Gitlab::Client, all_members: paginated))
 
-      described_class.call(repository, gitlab_access_token)
+      described_class.call(repository)
     end
 
     it 'defaults to gitlab.com when no GitLab URL is configured' do
       paginated = double(auto_paginate: nil)
       expect(Gitlab).to receive(:client)
-        .with(endpoint: 'https://gitlab.com/api/v4', private_token: gitlab_access_token)
+        .with(endpoint: 'https://gitlab.com/api/v4', private_token: repository.access_token)
         .and_return(instance_double(Gitlab::Client, all_members: paginated))
 
-      described_class.call(repository, gitlab_access_token)
+      described_class.call(repository)
     end
   end
 end

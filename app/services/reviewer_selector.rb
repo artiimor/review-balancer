@@ -55,7 +55,7 @@ class ReviewerSelector
 
   def self.assign_reviewer_in_github(pull_request, reviewer, previous_reviewers = [])
     repository = pull_request.repository
-    client = Octokit::Client.new(access_token: repository.user.configuration.github_access_token)
+    client = Octokit::Client.new(access_token: repository.access_token)
 
     previous_logins = previous_reviewers.map(&:github_login) - [reviewer.github_login]
     if previous_logins.any?
@@ -73,9 +73,8 @@ class ReviewerSelector
 
   def self.assign_reviewer_in_gitlab(pull_request, reviewer)
     repository = pull_request.repository
-    configuration = repository.user.configuration
     client = ::Gitlab.client(
-      endpoint: configuration.gitlab_api_endpoint, private_token: configuration.gitlab_access_token
+      endpoint: repository.user.configuration.gitlab_api_endpoint, private_token: repository.access_token
     )
 
     gitlab_user = client.users(username: reviewer.github_login).first

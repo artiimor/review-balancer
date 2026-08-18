@@ -2,14 +2,13 @@
 
 module Github
   class GithubPullRequestProcessor
-    def self.call(repository, payload, access_token)
-      new(repository, payload, access_token).call
+    def self.call(repository, payload)
+      new(repository, payload).call
     end
 
-    def initialize(repository, payload, access_token)
+    def initialize(repository, payload)
       @repository = repository
       @payload = payload
-      @access_token = access_token
     end
 
     def call
@@ -108,7 +107,7 @@ module Github
     end
 
     def github_client
-      @github_client ||= Octokit::Client.new(access_token: @access_token)
+      @github_client ||= Octokit::Client.new(access_token: repository.access_token)
     end
   end
 end

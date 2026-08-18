@@ -4,14 +4,13 @@ module Gitlab
   class GitlabPullRequestsImporter
     LOOKBACK = 1.year
 
-    def self.call(repository, gitlab_access_token, lookback: LOOKBACK)
-      new(repository, gitlab_access_token, lookback: lookback).call
+    def self.call(repository, lookback: LOOKBACK)
+      new(repository, lookback: lookback).call
     end
 
-    def initialize(repository, gitlab_access_token, lookback: LOOKBACK)
+    def initialize(repository, lookback: LOOKBACK)
       # TODO controlar que no sean nil, y loggear un error si lo son
       @repository = repository
-      @gitlab_access_token = gitlab_access_token
       @lookback = lookback
     end
 
@@ -100,7 +99,7 @@ module Gitlab
 
     def gitlab_client
       @gitlab_client ||= ::Gitlab.client(
-        endpoint: endpoint, private_token: @gitlab_access_token
+        endpoint: endpoint, private_token: repository.access_token
       )
     end
 

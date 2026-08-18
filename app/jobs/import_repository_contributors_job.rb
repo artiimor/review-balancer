@@ -3,12 +3,12 @@
 class ImportRepositoryContributorsJob < ApplicationJob
   queue_as :default
 
-  def perform(repository_id, access_token)
+  def perform(repository_id)
     repository = Repository.find(repository_id)
     if repository.provider == 'github'
-      Github::GithubContributorsImporter.call(repository, access_token)
+      Github::GithubContributorsImporter.call(repository)
     elsif repository.provider == 'gitlab'
-      Gitlab::GitlabContributorsImporter.call(repository, access_token)
+      Gitlab::GitlabContributorsImporter.call(repository)
     end
   end
 end

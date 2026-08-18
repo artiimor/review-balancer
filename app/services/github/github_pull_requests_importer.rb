@@ -4,14 +4,13 @@ module Github
   class GithubPullRequestsImporter
     LOOKBACK = 1.year
 
-    def self.call(repository, github_access_token, lookback: LOOKBACK)
-      new(repository, github_access_token, lookback: lookback).call
+    def self.call(repository, lookback: LOOKBACK)
+      new(repository, lookback: lookback).call
     end
 
-    def initialize(repository, github_access_token, lookback: LOOKBACK)
+    def initialize(repository, lookback: LOOKBACK)
       # TODO controlar que no sean nil, y loggear un error si lo son
       @repository = repository
-      @github_access_token = github_access_token
       @lookback = lookback
     end
 
@@ -89,7 +88,7 @@ module Github
     end
 
     def github_client
-      @github_client ||= Octokit::Client.new(access_token: @github_access_token)
+      @github_client ||= Octokit::Client.new(access_token: repository.access_token)
     end
   end
 end

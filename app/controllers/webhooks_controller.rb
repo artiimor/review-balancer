@@ -10,7 +10,7 @@ class WebhooksController < ApplicationController
     return head :unauthorized unless valid_github_signature?(repository)
 
     if github_merge_request_event?
-      ProcessPullRequestJob.perform_later(repository.id, payload, repository.user.configuration&.github_access_token)
+      ProcessPullRequestJob.perform_later(repository.id, payload)
     end
 
     head :ok
@@ -22,7 +22,7 @@ class WebhooksController < ApplicationController
     return head :unauthorized unless valid_gitlab_signature?(repository)
 
     if gitlab_merge_request_event?
-      ProcessPullRequestJob.perform_later(repository.id, payload, repository.user.configuration&.gitlab_access_token)
+      ProcessPullRequestJob.perform_later(repository.id, payload)
     end
 
     head :ok

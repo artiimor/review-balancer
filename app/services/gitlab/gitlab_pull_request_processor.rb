@@ -2,14 +2,13 @@
 
 module Gitlab
   class GitlabPullRequestProcessor
-    def self.call(repository, payload, access_token)
-      new(repository, payload, access_token).call
+    def self.call(repository, payload)
+      new(repository, payload).call
     end
 
-    def initialize(repository, payload, access_token)
+    def initialize(repository, payload)
       @repository = repository
       @payload = payload
-      @access_token = access_token
     end
 
     def call
@@ -106,7 +105,7 @@ module Gitlab
 
     def gitlab_client
       @gitlab_client ||= ::Gitlab.client(
-        endpoint: endpoint, private_token: @access_token
+        endpoint: endpoint, private_token: repository.access_token
       )
     end
 

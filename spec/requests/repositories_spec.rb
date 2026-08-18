@@ -71,17 +71,15 @@ RSpec.describe 'Repositories', type: :request do
         expect(response.body).to include('acme/new-repo')
       end
 
-      it 'enqueues the import jobs with the repository id and the github access token' do
+      it 'enqueues the import jobs with just the repository id, not the access token' do
         post repositories_path,
              params: valid_params,
              headers: headers
 
         repository = user.repositories.find_by(github_full_name: 'acme/new-repo')
 
-        expect(ImportRepositoryContributorsJob).to have_been_enqueued
-          .with(repository.id, user.configuration.github_access_token)
-        expect(ImportRepositoryPullRequestsJob).to have_been_enqueued
-          .with(repository.id, user.configuration.github_access_token)
+        expect(ImportRepositoryContributorsJob).to have_been_enqueued.with(repository.id)
+        expect(ImportRepositoryPullRequestsJob).to have_been_enqueued.with(repository.id)
       end
 
       context 'when the provider is gitlab' do
@@ -89,17 +87,15 @@ RSpec.describe 'Repositories', type: :request do
           { repository: { github_full_name: 'acme/new-gitlab-repo', webhook_secret: 's3cr3t', provider: 'gitlab' } }
         end
 
-        it 'enqueues the import jobs with the repository id and the gitlab access token' do
+        it 'enqueues the import jobs with just the repository id, not the access token' do
           post repositories_path,
                params: valid_params,
                headers: headers
 
           repository = user.repositories.find_by(github_full_name: 'acme/new-gitlab-repo')
 
-          expect(ImportRepositoryContributorsJob).to have_been_enqueued
-            .with(repository.id, user.configuration.gitlab_access_token)
-          expect(ImportRepositoryPullRequestsJob).to have_been_enqueued
-            .with(repository.id, user.configuration.gitlab_access_token)
+          expect(ImportRepositoryContributorsJob).to have_been_enqueued.with(repository.id)
+          expect(ImportRepositoryPullRequestsJob).to have_been_enqueued.with(repository.id)
         end
       end
     end

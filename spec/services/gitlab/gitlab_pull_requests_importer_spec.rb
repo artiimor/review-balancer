@@ -5,7 +5,6 @@ require 'rails_helper'
 RSpec.describe Gitlab::GitlabPullRequestsImporter do
   describe '.call' do
     let(:repository) { create(:repository, github_full_name: 'acme/checkout-api', provider: 'gitlab') }
-    let!(:gitlab_access_token) { 'fake_token' }
 
     def gitlab_mr(iid:, username: 'alice', created_at: 1.day.ago, merged_at: 1.day.ago, reviewers: [])
       double(iid: iid, author: double(username: username), title: 'Some MR', created_at: created_at,
@@ -34,7 +33,7 @@ RSpec.describe Gitlab::GitlabPullRequestsImporter do
         .with(repository.github_full_name, 42)
         .and_return(double(changes: [gitlab_file(path: 'app/models/user.rb')]))
 
-      described_class.call(repository, gitlab_access_token)
+      described_class.call(repository)
 
       pull_request = PullRequest.find_by(repository: repository, github_number: 42)
       expect(pull_request).to be_present
@@ -52,7 +51,7 @@ RSpec.describe Gitlab::GitlabPullRequestsImporter do
       stub_merge_requests([gitlab_mr(iid: 7, merged_at: nil)])
       stub_merge_requests([], page: 2)
 
-      expect { described_class.call(repository, gitlab_access_token) }.not_to change(PullRequest, :count)
+      expect { described_class.call(repository) }.not_to change(PullRequest, :count)
     end
 
     it 'imports the requested reviewer when the merge request already has one' do
@@ -60,7 +59,7 @@ RSpec.describe Gitlab::GitlabPullRequestsImporter do
       stub_merge_requests([], page: 2)
       allow_any_instance_of(Gitlab::Client).to receive(:merge_request_changes).and_return(double(changes: []))
 
-      described_class.call(repository, gitlab_access_token)
+      described_class.call(repository)
 
       pull_request = PullRequest.find_by(repository: repository, github_number: 42)
       assignment = pull_request.current_review_assignment
@@ -73,7 +72,7 @@ RSpec.describe Gitlab::GitlabPullRequestsImporter do
       stub_merge_requests([], page: 2)
       allow_any_instance_of(Gitlab::Client).to receive(:merge_request_changes).and_return(double(changes: []))
 
-      described_class.call(repository, gitlab_access_token)
+      described_class.call(repository)
 
       expect(repository.contributors.reload.map(&:github_login)).to include('bob')
     end
@@ -83,7 +82,7 @@ RSpec.describe Gitlab::GitlabPullRequestsImporter do
       stub_merge_requests([], page: 2)
       allow_any_instance_of(Gitlab::Client).to receive(:merge_request_changes).and_return(double(changes: []))
 
-      described_class.call(repository, gitlab_access_token)
+      described_class.call(repository)
 
       pull_request = PullRequest.find_by(repository: repository, github_number: 42)
       expect(pull_request.review_assignments).to be_empty
@@ -97,7 +96,7 @@ RSpec.describe Gitlab::GitlabPullRequestsImporter do
       stub_merge_requests([], page: 2)
       allow_any_instance_of(Gitlab::Client).to receive(:merge_request_changes).and_return(double(changes: []))
 
-      expect { described_class.call(repository, gitlab_access_token) }.not_to change(ReviewAssignment, :count)
+      expect { described_class.call(repository) }.not_to change(ReviewAssignment, :count)
     end
 
     it 'stops once it reaches a merge request older than the 1 year lookback' do
@@ -106,7 +105,7 @@ RSpec.describe Gitlab::GitlabPullRequestsImporter do
       stub_merge_requests([recent, old])
       allow_any_instance_of(Gitlab::Client).to receive(:merge_request_changes).and_return(double(changes: []))
 
-      described_class.call(repository, gitlab_access_token)
+      described_class.call(repository)
 
       expect(PullRequest.where(repository: repository).pluck(:github_number)).to contain_exactly(1)
     end
@@ -117,7 +116,7 @@ RSpec.describe Gitlab::GitlabPullRequestsImporter do
       stub_merge_requests([], page: 2)
       allow_any_instance_of(Gitlab::Client).to receive(:merge_request_changes).and_return(double(changes: []))
 
-      expect { described_class.call(repository, gitlab_access_token) }.not_to change(Contributor, :count)
+      expect { described_class.call(repository) }.not_to change(Contributor, :count)
       expect(PullRequest.find_by(github_number: 5).author).to eq(existing_author)
     end
 
@@ -129,7 +128,7 @@ RSpec.describe Gitlab::GitlabPullRequestsImporter do
 
       expect_any_instance_of(Gitlab::Client).not_to receive(:merge_request_changes)
 
-      described_class.call(repository, gitlab_access_token)
+      described_class.call(repository)
     end
 
     it 'paginates through multiple pages of merged merge requests' do
@@ -138,7 +137,7 @@ RSpec.describe Gitlab::GitlabPullRequestsImporter do
       stub_merge_requests([], page: 3)
       allow_any_instance_of(Gitlab::Client).to receive(:merge_request_changes).and_return(double(changes: []))
 
-      described_class.call(repository, gitlab_access_token)
+      described_class.call(repository)
 
       expect(PullRequest.where(repository: repository).pluck(:github_number)).to contain_exactly(1, 2)
     end
@@ -149,7 +148,7 @@ RSpec.describe Gitlab::GitlabPullRequestsImporter do
       stub_merge_requests([recent, old])
       allow_any_instance_of(Gitlab::Client).to receive(:merge_request_changes).and_return(double(changes: []))
 
-      described_class.call(repository, gitlab_access_token, lookback: 6.months)
+      described_class.call(repository, lookback: 6.months)
 
       expect(PullRequest.where(repository: repository).pluck(:github_number)).to contain_exactly(1)
     end
@@ -158,19 +157,19 @@ RSpec.describe Gitlab::GitlabPullRequestsImporter do
       repository.user.configuration.update!(gitlab_url: 'https://gitlab.example.com')
       client = instance_double(Gitlab::Client, merge_requests: [])
       expect(Gitlab).to receive(:client)
-        .with(endpoint: 'https://gitlab.example.com/api/v4', private_token: gitlab_access_token)
+        .with(endpoint: 'https://gitlab.example.com/api/v4', private_token: repository.access_token)
         .and_return(client)
 
-      described_class.call(repository, gitlab_access_token)
+      described_class.call(repository)
     end
 
     it 'defaults to gitlab.com when no GitLab URL is configured' do
       client = instance_double(Gitlab::Client, merge_requests: [])
       expect(Gitlab).to receive(:client)
-        .with(endpoint: 'https://gitlab.com/api/v4', private_token: gitlab_access_token)
+        .with(endpoint: 'https://gitlab.com/api/v4', private_token: repository.access_token)
         .and_return(client)
 
-      described_class.call(repository, gitlab_access_token)
+      described_class.call(repository)
     end
   end
 end
