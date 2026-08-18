@@ -113,7 +113,10 @@ RSpec.describe Contributor do
       pr_in_a = create(:pull_request, repository: repo_a)
 
       create(:review_assignment, reviewer: contributor, pull_request: pr_in_a, completed_at: nil)
-      expect { create(:review_assignment, reviewer: contributor, pull_request: create(:pull_request, repository: repo_b), completed_at: nil) }
+      expect do
+        create(:review_assignment, reviewer: contributor, pull_request: create(:pull_request, repository: repo_b),
+                                   completed_at: nil)
+      end
         .not_to(change { contributor.current_review_load(repo_a.id) })
     end
   end

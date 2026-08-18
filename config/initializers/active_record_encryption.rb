@@ -6,7 +6,7 @@
 # bien con Docker/12-factor. Generarlas con:
 #   bin/rails db:encryption:init
 Rails.application.configure do
-  config.active_record.encryption.primary_key = ENV['AR_ENCRYPTION_PRIMARY_KEY']
-  config.active_record.encryption.deterministic_key = ENV['AR_ENCRYPTION_DETERMINISTIC_KEY']
-  config.active_record.encryption.key_derivation_salt = ENV['AR_ENCRYPTION_KEY_DERIVATION_SALT']
+  config.active_record.encryption.primary_key = ENV.fetch('AR_ENCRYPTION_PRIMARY_KEY', nil)
+  config.active_record.encryption.deterministic_key = ENV.fetch('AR_ENCRYPTION_DETERMINISTIC_KEY', nil)
+  config.active_record.encryption.key_derivation_salt = ENV.fetch('AR_ENCRYPTION_KEY_DERIVATION_SALT', nil)
 end

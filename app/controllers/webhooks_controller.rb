@@ -3,15 +3,15 @@
 class WebhooksController < ApplicationController
   skip_before_action :verify_authenticity_token, raise: false
 
+  rescue_from ActiveRecord::Encryption::Errors::Base, with: :handle_encryption_error
+
   def github
     repository = Repository.find_by(github_full_name: payload.dig('repository', 'full_name'), provider: 'github')
     return head :not_found unless repository
 
     return head :unauthorized unless valid_github_signature?(repository)
 
-    if github_merge_request_event?
-      ProcessPullRequestJob.perform_later(repository.id, payload)
-    end
+    ProcessPullRequestJob.perform_later(repository.id, payload) if github_merge_request_event?
 
     head :ok
   end
@@ -21,14 +21,17 @@ class WebhooksController < ApplicationController
     return head :not_found unless repository
     return head :unauthorized unless valid_gitlab_signature?(repository)
 
-    if gitlab_merge_request_event?
-      ProcessPullRequestJob.perform_later(repository.id, payload)
-    end
+    ProcessPullRequestJob.perform_later(repository.id, payload) if gitlab_merge_request_event?
 
     head :ok
   end
 
   private
+
+  def handle_encryption_error(exception)
+    Rails.logger.error("#{self.class}: #{exception.class} - #{exception.message}")
+    head :internal_server_error
+  end
 
   def valid_github_signature?(repository)
     Github::GithubSignatureVerifier.valid?(

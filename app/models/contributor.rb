@@ -18,7 +18,7 @@ class Contributor < ApplicationRecord
 
   def current_review_load(repository_id)
     review_assignments.joins(:pull_request)
-                       .where(pull_requests: { repository_id: repository_id }, completed_at: nil)
-                       .count
+                      .where(pull_requests: { repository_id: repository_id }, completed_at: nil)
+                      .count
   end
 end

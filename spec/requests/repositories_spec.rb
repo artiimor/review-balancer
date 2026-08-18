@@ -29,9 +29,10 @@ RSpec.describe 'Repositories', type: :request do
       expect(response).to redirect_to(new_user_session_path)
     end
 
-    context 'when the user does not have a GitHub access token' do
+    context 'when the user does not have a GitHub or GitLab access token' do
       it 'redirects to the configuration page with an alert' do
         user.configuration.update(github_access_token: nil)
+        user.configuration.update(gitlab_access_token: nil)
 
         get repositories_path
 
@@ -220,10 +221,11 @@ RSpec.describe 'Repositories', type: :request do
       end
     end
 
-    context 'when the user does not have a GitHub access token' do
+    context 'when the user does not have a GitHub or GitLab access token' do
       it 'redirects to the configuration page with an alert' do
         repository = user.repositories.create!(github_full_name: 'acme/checkout-api', webhook_secret: 's3cr3t')
         user.configuration.update(github_access_token: nil)
+        user.configuration.update(gitlab_access_token: nil)
 
         get repository_path(repository)
         expect(response).to redirect_to(configuration_path)

@@ -9,7 +9,7 @@ module Github
     end
 
     def initialize(repository, lookback: LOOKBACK)
-      # TODO controlar que no sean nil, y loggear un error si lo son
+      # TODO: controlar que no sean nil, y loggear un error si lo son
       @repository = repository
       @lookback = lookback
     end

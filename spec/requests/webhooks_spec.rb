@@ -132,6 +132,22 @@ RSpec.describe 'Webhooks', type: :request do
     expect(response).to have_http_status(:not_found)
   end
 
+  it 'returns 500 instead of a browser redirect when Active Record Encryption is misconfigured' do
+    allow_any_instance_of(Repository).to receive(:webhook_secret)
+      .and_raise(ActiveRecord::Encryption::Errors::Configuration)
+    signature = signature_for(raw_body, 's3cr3t')
+
+    post '/webhooks/github',
+         params: raw_body,
+         headers: {
+           'Content-Type' => 'application/json',
+           'X-GitHub-Event' => 'pull_request',
+           'X-Hub-Signature-256' => signature
+         }
+
+    expect(response).to have_http_status(:internal_server_error)
+  end
+
   describe '/webhooks/gitlab' do
     let!(:gitlab_repository) do
       Repository.create!(

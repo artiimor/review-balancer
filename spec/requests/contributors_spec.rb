@@ -112,5 +112,16 @@ RSpec.describe 'Contributors', type: :request do
 
       expect(response).to redirect_to(new_user_session_path)
     end
+
+    it 'redirects with an alert' do
+      contributor = create(:contributor)
+      create(:repository_contributor, repository: repository, contributor: contributor, active: true)
+      allow_any_instance_of(Contributor).to receive(:update).and_return(false)
+
+      patch repository_contributor_path(repository, contributor), params: { contributor: { name: 'New name' } }
+
+      expect(response).to redirect_to(repository_contributors_path(repository))
+      expect(flash[:alert]).to eq('No se han podido guardar los cambios del colaborador')
+    end
   end
 end

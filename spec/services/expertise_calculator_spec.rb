@@ -87,7 +87,9 @@ RSpec.describe ExpertiseCalculator do
   end
 
   context 'when the contributor is in two different repositories' do
-    let(:other_repository) { Repository.create!(github_full_name: 'arturo/other', webhook_secret: 's3cr3t', user: user) }
+    let(:other_repository) do
+      Repository.create!(github_full_name: 'arturo/other', webhook_secret: 's3cr3t', user: user)
+    end
     def other_merged_pr(days_ago:, author: other_author)
       PullRequest.create!(
         repository: other_repository,
@@ -104,9 +106,9 @@ RSpec.describe ExpertiseCalculator do
       other_pr = other_merged_pr(days_ago: 1)
 
       FileChange.create!(pull_request: pr, contributor: contributor, path: 'app/models/user.rb',
-                       tech: 'Ruby', lines_changed: 100)
+                         tech: 'Ruby', lines_changed: 100)
       FileChange.create!(pull_request: other_pr, contributor: contributor, path: 'hello_world.c',
-                       tech: 'C', lines_changed: 100)
+                         tech: 'C', lines_changed: 100)
 
       scores = described_class.map_for(contributor, repository)
 

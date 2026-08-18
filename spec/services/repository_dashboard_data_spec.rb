@@ -8,7 +8,7 @@ RSpec.describe RepositoryDashboardData do
 
   def merged_pr(author:, days_ago: 1, repo: repository, merged_at: days_ago.days.ago)
     create(:pull_request, repository: repo, author: author,
-                           opened_at: merged_at - 1.hour, merged_at: merged_at, state: 'merged')
+                          opened_at: merged_at - 1.hour, merged_at: merged_at, state: 'merged')
   end
 
   describe '.call' do
@@ -116,7 +116,9 @@ RSpec.describe RepositoryDashboardData do
 
       result = described_class.call(repository)
 
-      levels = result[:expertise_rows].each_with_object({}) { |row, memo| memo[row[:contributor]] = row[:cells].first.level }
+      levels = result[:expertise_rows].to_h do |row|
+        [row[:contributor], row[:cells].first.level]
+      end
 
       expect(levels[low]).to eq('bajo')
       expect(levels[mid]).to eq('medio')
@@ -129,9 +131,9 @@ RSpec.describe RepositoryDashboardData do
       bob = create(:contributor, github_login: 'bob')
 
       create(:file_change, pull_request: merged_pr(author: alice, merged_at: moment), contributor: alice,
-                            tech: 'Ruby', lines_changed: 100)
+                           tech: 'Ruby', lines_changed: 100)
       create(:file_change, pull_request: merged_pr(author: bob, merged_at: moment), contributor: bob,
-                            tech: 'Ruby', lines_changed: 100)
+                           tech: 'Ruby', lines_changed: 100)
 
       result = nil
       freeze_time { result = described_class.call(repository) }
@@ -146,11 +148,11 @@ RSpec.describe RepositoryDashboardData do
       carol = create(:contributor, github_login: 'carol')
 
       create(:file_change, pull_request: merged_pr(author: alice, days_ago: 1), contributor: alice,
-                            tech: 'Ruby', lines_changed: 200)
+                           tech: 'Ruby', lines_changed: 200)
       create(:file_change, pull_request: merged_pr(author: bob, days_ago: 1), contributor: bob,
-                            tech: 'JavaScript', lines_changed: 200)
+                           tech: 'JavaScript', lines_changed: 200)
       create(:file_change, pull_request: merged_pr(author: carol, days_ago: 900), contributor: carol,
-                            tech: 'Python', lines_changed: 50)
+                           tech: 'Python', lines_changed: 50)
 
       result = described_class.call(repository)
 

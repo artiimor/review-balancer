@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
-# Envía un mensaje a Slack cuando se asigna una revisión. Usa un bot token
-# simple (chat.postMessage) — no hace falta nada más sofisticado para el MVP.
+# Pending integration
 class SlackNotifier
   SLACK_API_URL = 'https://slack.com/api/chat.postMessage'
 
@@ -12,7 +11,7 @@ class SlackNotifier
     return unless reviewer.slack_user_id.present?
 
     text = I18n.t('services.slack_notifier.review_assigned',
-                   number: pr.github_number, title: pr.title, repository: pr.repository.github_full_name)
+                  number: pr.github_number, title: pr.title, repository: pr.repository.github_full_name)
 
     connection.post do |req|
       req.body = {

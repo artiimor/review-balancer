@@ -6,4 +6,3 @@ es:
       updated: "Configuración actualizada correctamente."
       github_token_removed: "Token de GitHub eliminado."
       gitlab_token_removed: "Token de GitLab eliminado."
-      encryption_unavailable: "Error. Por favor, contacte con un administrador."

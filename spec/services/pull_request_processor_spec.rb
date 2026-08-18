@@ -92,7 +92,8 @@ RSpec.describe PullRequestProcessor do
       end
 
       it 'is idempotent if a pull_request with that repository_id + github_number already exists' do
-        existing_pull_request = create(:pull_request, github_number: payload['pull_request']['number'], repository: repository)
+        create(:pull_request, github_number: payload['pull_request']['number'],
+                              repository: repository)
         expect { described_class.call(repository.id, payload) }.not_to change(PullRequest, :count)
       end
 
@@ -114,7 +115,8 @@ RSpec.describe PullRequestProcessor do
 
       it 'requests the changed files from the GitHub API' do
         pull_request = create(:pull_request, github_number: payload['pull_request']['number'], repository: repository)
-        expect_any_instance_of(Octokit::Client).to receive(:pull_request_files).with(repository.github_full_name, pull_request.github_number).and_return([])
+        expect_any_instance_of(Octokit::Client).to receive(:pull_request_files).with(repository.github_full_name,
+                                                                                     pull_request.github_number).and_return([])
 
         described_class.call(repository.id, payload)
       end
@@ -122,8 +124,10 @@ RSpec.describe PullRequestProcessor do
 
     context 'when action is closed and the PR was merged' do
       let(:payload) { JSON.parse(file_fixture('github_pull_request_closed_merged.json').read) }
-      let(:files) { [ double(filename: 'app/controllers/users_controller.rb', additions: 10, deletions: 5),
-                      double(filename: 'app/models/user.rb', additions: 2, deletions: 0) ] }
+      let(:files) do
+        [double(filename: 'app/controllers/users_controller.rb', additions: 10, deletions: 5),
+         double(filename: 'app/models/user.rb', additions: 2, deletions: 0)]
+      end
 
       it 'updates the state of the pull_request to "merged" with its merged_at' do
         pull_request = create(:pull_request, github_number: payload['pull_request']['number'], repository: repository)
@@ -140,14 +144,16 @@ RSpec.describe PullRequestProcessor do
 
       it 'requests the changed files from the GitHub API' do
         pull_request = create(:pull_request, github_number: payload['pull_request']['number'], repository: repository)
-        expect_any_instance_of(Octokit::Client).to receive(:pull_request_files).with(repository.github_full_name, pull_request.github_number).and_return([])
+        expect_any_instance_of(Octokit::Client).to receive(:pull_request_files).with(repository.github_full_name,
+                                                                                     pull_request.github_number).and_return([])
 
         described_class.call(repository.id, payload)
       end
 
       it 'creates a FileChange for each returned file' do
         pull_request = create(:pull_request, github_number: payload['pull_request']['number'], repository: repository)
-        expect_any_instance_of(Octokit::Client).to receive(:pull_request_files).with(repository.github_full_name, pull_request.github_number).and_return(files)
+        expect_any_instance_of(Octokit::Client).to receive(:pull_request_files).with(repository.github_full_name,
+                                                                                     pull_request.github_number).and_return(files)
 
         described_class.call(repository.id, payload)
 
@@ -156,7 +162,8 @@ RSpec.describe PullRequestProcessor do
 
       it 'assigns the tech to each FileChange via FileLanguageMapper' do
         pull_request = create(:pull_request, github_number: payload['pull_request']['number'], repository: repository)
-        expect_any_instance_of(Octokit::Client).to receive(:pull_request_files).with(repository.github_full_name, pull_request.github_number).and_return(files)
+        expect_any_instance_of(Octokit::Client).to receive(:pull_request_files).with(repository.github_full_name,
+                                                                                     pull_request.github_number).and_return(files)
 
         described_class.call(repository.id, payload)
 
@@ -178,7 +185,7 @@ RSpec.describe PullRequestProcessor do
       end
 
       it 'does not create file_changes' do
-        pull_request = create(:pull_request, github_number: payload['pull_request']['number'], repository: repository)
+        create(:pull_request, github_number: payload['pull_request']['number'], repository: repository)
         allow_any_instance_of(Octokit::Client).to receive(:pull_request_files).and_return([])
 
         described_class.call(repository.id, payload)
@@ -187,7 +194,7 @@ RSpec.describe PullRequestProcessor do
       end
 
       it 'does not call the GitHub API' do
-        pull_request = create(:pull_request, github_number: payload['pull_request']['number'], repository: repository)
+        create(:pull_request, github_number: payload['pull_request']['number'], repository: repository)
         expect_any_instance_of(Octokit::Client).not_to receive(:pull_request_files)
 
         described_class.call(repository.id, payload)

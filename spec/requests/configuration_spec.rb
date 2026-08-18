@@ -161,24 +161,24 @@ RSpec.describe 'Configuration', type: :request do
   end
 
   describe 'when Active Record Encryption is misconfigured (missing AR_ENCRYPTION_* keys)' do
-    it 'redirects with a generic message instead of raising on #show' do
+    it 'renders a generic message instead of raising on #show' do
       allow_any_instance_of(Configuration).to receive(:github_access_token)
         .and_raise(ActiveRecord::Encryption::Errors::Configuration)
 
       get configuration_path
 
-      expect(response).to redirect_to(root_path)
-      expect(flash[:alert]).to eq('Error. Por favor, contacte con un administrador.')
+      expect(response).to have_http_status(:internal_server_error)
+      expect(response.body).to eq('Error. Por favor, contacte con un administrador.')
     end
 
-    it 'redirects with a generic message instead of raising on #update' do
+    it 'renders a generic message instead of raising on #update' do
       allow_any_instance_of(Configuration).to receive(:update)
         .and_raise(ActiveRecord::Encryption::Errors::Configuration)
 
       patch configuration_path, params: { configuration: { lookback_months: 3 } }
 
-      expect(response).to redirect_to(root_path)
-      expect(flash[:alert]).to eq('Error. Por favor, contacte con un administrador.')
+      expect(response).to have_http_status(:internal_server_error)
+      expect(response.body).to eq('Error. Por favor, contacte con un administrador.')
     end
   end
 end

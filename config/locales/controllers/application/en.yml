@@ -2,3 +2,6 @@ en:
   controllers:
     application:
       github_token_required: "You need to set a GitHub access token before managing repositories."
+      errors:
+        bad_request: "The request is not valid."
+        encryption_unavailable: "Error. Please contact an administrator."
