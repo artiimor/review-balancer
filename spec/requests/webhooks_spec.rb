@@ -108,6 +108,30 @@ RSpec.describe 'Webhooks', type: :request do
     expect(response).to have_http_status(:not_found)
   end
 
+  it 'returns 404 instead of crashing when the body is not valid JSON' do
+    post '/webhooks/github',
+         params: 'not valid json{{{',
+         headers: {
+           'Content-Type' => 'application/json',
+           'X-GitHub-Event' => 'pull_request',
+           'X-Hub-Signature-256' => 'sha256=whatever'
+         }
+
+    expect(response).to have_http_status(:not_found)
+  end
+
+  it "returns 404 instead of crashing when the payload has no 'repository' key" do
+    post '/webhooks/github',
+         params: '{"action":"opened"}',
+         headers: {
+           'Content-Type' => 'application/json',
+           'X-GitHub-Event' => 'pull_request',
+           'X-Hub-Signature-256' => 'sha256=whatever'
+         }
+
+    expect(response).to have_http_status(:not_found)
+  end
+
   describe '/webhooks/gitlab' do
     let!(:gitlab_repository) do
       Repository.create!(
@@ -180,6 +204,24 @@ RSpec.describe 'Webhooks', type: :request do
       unknown_body = gitlab_body.sub('acme/checkout-api-gitlab', 'acme/otro-repo-no-registrado')
 
       post_gitlab_webhook(body: unknown_body, token: 's3cr3t')
+
+      expect(response).to have_http_status(:not_found)
+    end
+
+    it 'returns 404 instead of crashing when the body is not valid JSON' do
+      post '/webhooks/gitlab',
+           params: 'not valid json{{{',
+           headers: { 'Content-Type' => 'application/json', 'X-Gitlab-Event' => 'Merge Request Hook',
+                      'X-Gitlab-Token' => 's3cr3t' }
+
+      expect(response).to have_http_status(:not_found)
+    end
+
+    it "returns 404 instead of crashing when the payload has no 'project' key" do
+      post '/webhooks/gitlab',
+           params: '{"object_attributes":{"action":"open"}}',
+           headers: { 'Content-Type' => 'application/json', 'X-Gitlab-Event' => 'Merge Request Hook',
+                      'X-Gitlab-Token' => 's3cr3t' }
 
       expect(response).to have_http_status(:not_found)
     end

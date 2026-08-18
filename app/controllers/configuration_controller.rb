@@ -3,6 +3,8 @@
 class ConfigurationController < ApplicationController
   before_action :authenticate_user!
 
+  rescue_from ActiveRecord::Encryption::Errors::Base, with: :handle_encryption_error
+
   LOCKED_TOKEN_ALERTS = {
     github_access_token: 'controllers.configuration.github_token_locked',
     gitlab_access_token: 'controllers.configuration.gitlab_token_locked'
@@ -42,6 +44,11 @@ class ConfigurationController < ApplicationController
   end
 
   private
+
+  def handle_encryption_error(exception)
+    Rails.logger.error("ConfigurationController: #{exception.class} - #{exception.message}")
+    redirect_to root_path, alert: t('controllers.configuration.encryption_unavailable')
+  end
 
   def locked_token_alert
     LOCKED_TOKEN_ALERTS.each do |field, alert_key|

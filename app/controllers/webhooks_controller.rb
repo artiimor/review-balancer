@@ -4,7 +4,7 @@ class WebhooksController < ApplicationController
   skip_before_action :verify_authenticity_token, raise: false
 
   def github
-    repository = Repository.find_by(github_full_name: payload['repository']['full_name'], provider: 'github')
+    repository = Repository.find_by(github_full_name: payload.dig('repository', 'full_name'), provider: 'github')
     return head :not_found unless repository
 
     return head :unauthorized unless valid_github_signature?(repository)
@@ -61,5 +61,7 @@ class WebhooksController < ApplicationController
 
   def payload
     @payload ||= JSON.parse(raw_body)
+  rescue JSON::ParserError
+    {}
   end
 end
