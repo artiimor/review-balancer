@@ -17,6 +17,12 @@ RSpec.describe RepositoryDashboardData do
 
       expect(result.keys).to contain_exactly(:pending_reviews, :techs, :expertise_rows)
     end
+
+    it 'logs and raises when repository is nil' do
+      expect(Rails.logger).to receive(:error).with(/repository is blank/)
+
+      expect { described_class.call(nil) }.to raise_error(ActionController::ParameterMissing)
+    end
   end
 
   describe 'pending_reviews' do

@@ -13,9 +13,9 @@ module Gitlab
 
     def call
       attrs = payload['object_attributes']
+      validate_payload!(attrs)
 
-      author = Contributor.find_or_create_by!(github_login: payload.dig('user', 'username'))
-      pull_request = find_or_create_pull_request(attrs, author)
+      pull_request = find_or_create_pull_request(attrs, find_or_create_author)
 
       case attrs['action']
       when 'open'
@@ -25,13 +25,28 @@ module Gitlab
       when 'close'
         finalize(pull_request, state: 'closed')
       when 'update'
-        handle_review_requested(pull_request) if payload.dig('changes', 'reviewers').present?
+        handle_review_requested(pull_request)
       end
     end
 
     private
 
     attr_reader :repository, :payload
+
+    def validate_payload!(attrs)
+      missing = []
+      missing << 'object_attributes.iid' if attrs['iid'].blank?
+      missing << 'user.username' if payload.dig('user', 'username').blank?
+      return if missing.empty?
+
+      message = "GitLab webhook payload missing #{missing.join(', ')}"
+      Rails.logger.error("Gitlab::GitlabPullRequestProcessor: #{message}")
+      raise ActionController::ParameterMissing, message
+    end
+
+    def find_or_create_author
+      Contributor.find_or_create_by!(github_login: payload.dig('user', 'username'))
+    end
 
     def handle_opened(pull_request)
       record_file_changes(pull_request)
@@ -103,13 +118,7 @@ module Gitlab
     end
 
     def gitlab_client
-      @gitlab_client ||= ::Gitlab.client(
-        endpoint: endpoint, private_token: repository.access_token
-      )
-    end
-
-    def endpoint
-      repository.user.configuration.gitlab_api_endpoint
+      @gitlab_client ||= repository.user.configuration.gitlab_client(private_token: repository.access_token)
     end
   end
 end

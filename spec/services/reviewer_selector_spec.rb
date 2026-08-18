@@ -30,11 +30,14 @@ RSpec.describe ReviewerSelector do
     end
   end
 
+  let(:pinned_ip) { '93.184.216.34' }
+
   before do
+    allow(SsrfProtection).to receive(:resolve_pinned_ip!).and_return(pinned_ip)
+
     Configuration.create!(user: user, lookback_months: 1,
                           github_access_token: 'gh-token', gitlab_access_token: 'gl-token')
 
-    # Todos han contribuido antes al repo (para aparecer como candidatos).
     merged_pr_touching(experta_ruby, 'Ruby', lines: 500)
     merged_pr_touching(experta_saturada, 'Ruby', lines: 800)
     merged_pr_touching(novato, 'Ruby', lines: 5)
@@ -42,7 +45,7 @@ RSpec.describe ReviewerSelector do
     allow_any_instance_of(Octokit::Client).to receive(:request_pull_request_review)
   end
 
-  it 'prioriza a quien más sabe de la tecnología tocada, entre los candidatos con carga similar' do
+  it 'prioritizes whoever knows most about the touched technology, among candidates with similar load' do
     pr = open_pr_touching('Ruby')
 
     ranked = described_class.rank(pr, top_n: 3)
@@ -52,10 +55,9 @@ RSpec.describe ReviewerSelector do
     expect(ranked.first[:score]).to be > ranked.last[:score]
   end
 
-  it 'penaliza a un experto saturado frente a alguien con menos carga aunque sepa algo menos' do
+  it 'penalizes a saturated expert against someone with less load even if they know somewhat less' do
     pr = open_pr_touching('Ruby')
 
-    # Saturamos a experta_saturada con 5 revisiones pendientes.
     5.times do
       ReviewAssignment.create!(pull_request: pr, reviewer: experta_saturada, assigned_at: Time.current)
     end
@@ -66,7 +68,7 @@ RSpec.describe ReviewerSelector do
     expect(top_choice).to eq(experta_ruby)
   end
 
-  it 'nunca elige al autor de la PR como su propio revisor' do
+  it 'never picks the PR author as their own reviewer' do
     pr = open_pr_touching('Ruby')
 
     ranked = described_class.rank(pr, top_n: 10)
@@ -74,7 +76,7 @@ RSpec.describe ReviewerSelector do
     expect(ranked.map { |r| r[:contributor] }).not_to include(author)
   end
 
-  it 'assign! crea el ReviewAssignment con el mejor candidato' do
+  it 'assign! creates the ReviewAssignment with the best candidate' do
     pr = open_pr_touching('Ruby')
 
     assignment = described_class.assign!(pr)
@@ -83,7 +85,7 @@ RSpec.describe ReviewerSelector do
     expect(assignment.pull_request).to eq(pr)
   end
 
-  it 'assign! no completa la asignación si la PR sigue abierta' do
+  it 'assign! does not complete the assignment if the PR is still open' do
     pr = open_pr_touching('Ruby')
 
     assignment = described_class.assign!(pr)
@@ -91,7 +93,7 @@ RSpec.describe ReviewerSelector do
     expect(assignment.completed_at).to be_nil
   end
 
-  it 'assign! completa la asignación al momento si la PR ya está cerrada (webhook desordenado o reintento tardío)' do
+  it 'assign! completes the assignment immediately if the PR is already closed (out-of-order webhook or late retry)' do
     pr = open_pr_touching('Ruby')
     pr.update!(state: 'merged', merged_at: Time.current)
 
@@ -100,7 +102,7 @@ RSpec.describe ReviewerSelector do
     expect(assignment.completed_at).not_to be_nil
   end
 
-  it 'matched_tech_for devuelve nil si el mejor candidato no tiene expertise en las techs tocadas' do
+  it 'matched_tech_for returns nil if the best candidate has no expertise in the touched techs' do
     pr = open_pr_touching('JavaScript/Frontend')
 
     assignment = described_class.assign!(pr)
@@ -108,7 +110,7 @@ RSpec.describe ReviewerSelector do
     expect(assignment.matched_tech).to be_nil
   end
 
-  it 'no elige como candidato a quien está de vacaciones ahora mismo' do
+  it 'does not pick as a candidate someone who is currently on vacation' do
     create(:holiday, contributor: experta_ruby, start_date: 1.day.ago, end_date: 1.day.from_now)
     pr = open_pr_touching('Ruby')
 
@@ -117,7 +119,7 @@ RSpec.describe ReviewerSelector do
     expect(candidates).not_to include(experta_ruby)
   end
 
-  it 'sigue considerando candidato a quien tiene unas vacaciones pasadas o futuras' do
+  it 'still considers as a candidate someone with past or future vacations' do
     create(:holiday, contributor: experta_ruby, start_date: 10.days.ago, end_date: 5.days.ago)
     create(:holiday, contributor: experta_ruby, start_date: 5.days.from_now, end_date: 10.days.from_now)
     pr = open_pr_touching('Ruby')
@@ -161,7 +163,13 @@ RSpec.describe ReviewerSelector do
     gitlab_client = instance_double(Gitlab::Client, users: [double(id: 99)], update_merge_request: true)
 
     expect(Gitlab).to receive(:client)
-      .with(endpoint: 'https://gitlab.com/api/v4', private_token: 'gl-token')
+      .with(
+        endpoint: 'https://gitlab.com/api/v4', private_token: 'gl-token',
+        httparty: {
+          connection_adapter: Gitlab::PinnedConnectionAdapter,
+          connection_adapter_options: { ssrf_safe_ip: pinned_ip }
+        }
+      )
       .and_return(gitlab_client)
 
     assignment = described_class.assign!(pr)

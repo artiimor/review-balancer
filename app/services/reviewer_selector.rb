@@ -73,9 +73,7 @@ class ReviewerSelector
 
   def self.assign_reviewer_in_gitlab(pull_request, reviewer)
     repository = pull_request.repository
-    client = ::Gitlab.client(
-      endpoint: repository.user.configuration.gitlab_api_endpoint, private_token: repository.access_token
-    )
+    client = repository.user.configuration.gitlab_client(private_token: repository.access_token)
 
     gitlab_user = client.users(username: reviewer.github_login).first
     return unless gitlab_user

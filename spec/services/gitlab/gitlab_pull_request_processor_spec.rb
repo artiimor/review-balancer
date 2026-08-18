@@ -4,8 +4,31 @@ require 'rails_helper'
 
 RSpec.describe Gitlab::GitlabPullRequestProcessor do
   let(:repository) { create(:repository, provider: 'gitlab') }
+  let(:pinned_ip) { '93.184.216.34' }
+
+  before do
+    allow(SsrfProtection).to receive(:resolve_pinned_ip!).and_return(pinned_ip)
+  end
 
   describe '.call' do
+    context 'when the payload is malformed' do
+      let(:payload) { JSON.parse(file_fixture('gitlab_merge_request_opened.json').read) }
+
+      it 'logs and raises when object_attributes.iid is missing' do
+        payload['object_attributes'].delete('iid')
+
+        expect(Rails.logger).to receive(:error).with(/object_attributes\.iid/)
+        expect { described_class.call(repository, payload) }.to raise_error(ActionController::ParameterMissing)
+      end
+
+      it 'logs and raises when user.username is missing' do
+        payload['user'].delete('username')
+
+        expect(Rails.logger).to receive(:error).with(/user\.username/)
+        expect { described_class.call(repository, payload) }.to raise_error(ActionController::ParameterMissing)
+      end
+    end
+
     context 'when the action is open' do
       let(:payload) { JSON.parse(file_fixture('gitlab_merge_request_opened.json').read) }
       let(:contributor_login) { payload['user']['username'] }
@@ -87,7 +110,13 @@ RSpec.describe Gitlab::GitlabPullRequestProcessor do
         repository.user.configuration.update!(gitlab_url: 'https://gitlab.example.com')
         client = instance_double(Gitlab::Client, merge_request_changes: double(changes: []))
         expect(Gitlab).to receive(:client)
-          .with(endpoint: 'https://gitlab.example.com/api/v4', private_token: repository.access_token)
+          .with(
+            endpoint: 'https://gitlab.example.com/api/v4', private_token: repository.access_token,
+            httparty: {
+              connection_adapter: Gitlab::PinnedConnectionAdapter,
+              connection_adapter_options: { ssrf_safe_ip: pinned_ip }
+            }
+          )
           .and_return(client)
 
         described_class.call(repository, payload)
@@ -168,18 +197,20 @@ RSpec.describe Gitlab::GitlabPullRequestProcessor do
       end
     end
 
-    context 'when the merge request is updated without a reviewer change' do
+    context 'when the merge request is updated and the GitLab instance omits the changes hash' do
       let(:payload) do
-        JSON.parse(file_fixture('gitlab_merge_request_reviewer_updated.json').read).tap { |p| p.delete('changes') }
+        JSON.parse(file_fixture('gitlab_merge_request_reviewer_updated.json').read).tap { |p| p['changes'] = {} }
       end
+      let(:reviewer_login) { payload['reviewers'].first['username'] }
 
-      it 'does not create a new review_assignment' do
+      it 'still reassigns the reviewer, since top-level reviewers is the source of truth' do
         pull_request = create(:pull_request, github_number: payload['object_attributes']['iid'], repository: repository)
         create(:review_assignment, pull_request: pull_request, completed_at: nil)
 
-        expect do
-          described_class.call(repository, payload)
-        end.not_to change(ReviewAssignment, :count)
+        described_class.call(repository, payload)
+
+        assignment = pull_request.reload.current_review_assignment
+        expect(assignment.reviewer.github_login).to eq(reviewer_login)
       end
     end
 

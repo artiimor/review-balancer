@@ -97,13 +97,7 @@ module Gitlab
     end
 
     def gitlab_client
-      @gitlab_client ||= ::Gitlab.client(
-        endpoint: endpoint, private_token: repository.access_token
-      )
-    end
-
-    def endpoint
-      repository.user.configuration.gitlab_api_endpoint
+      @gitlab_client ||= repository.user.configuration.gitlab_client(private_token: repository.access_token)
     end
   end
 end

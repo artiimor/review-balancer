@@ -34,6 +34,9 @@ class SsrfProtection
     IPAddr.new('ff00::/8')
   ].freeze
 
+  # Exact hostnames exempted from BLOCKED_RANGES, e.g. internal GitLab reachable only over VPN.
+  ALLOWED_HOSTS = ENV.fetch('SSRF_ALLOWED_HOSTS', '').split(',').map(&:strip).reject(&:blank?).freeze
+
   def self.safe?(url)
     assert_safe!(url)
     true
@@ -44,19 +47,36 @@ class SsrfProtection
   RESOLVE_TIMEOUT = 2 # seconds
 
   def self.assert_safe!(url)
+    uri = validate_scheme_and_host(url)
+    validate_addresses!(resolve(uri.host)) unless ALLOWED_HOSTS.include?(uri.host)
+  end
+
+  def self.resolve_pinned_ip!(url)
+    uri = validate_scheme_and_host(url)
+    addresses = resolve(uri.host)
+    raise UnsafeUrlError, 'could not resolve host' if addresses.empty?
+
+    validate_addresses!(addresses) unless ALLOWED_HOSTS.include?(uri.host)
+    addresses.first
+  end
+
+  def self.validate_scheme_and_host(url)
     uri = parse(url)
 
     raise UnsafeUrlError, 'scheme must be https' unless ALLOWED_SCHEMES.include?(uri.scheme)
     raise UnsafeUrlError, 'missing host' if uri.host.blank?
 
-    # A host that fails to resolve can't be reached either way, so there is
-    # nothing to protect against here; only block hosts that resolve to a
-    # non-public address.
-    resolve(uri.host).each do |address|
+    uri
+  end
+  private_class_method :validate_scheme_and_host
+
+  def self.validate_addresses!(addresses)
+    addresses.each do |address|
       ip = IPAddr.new(address)
       raise UnsafeUrlError, "#{address} is not a public address" if BLOCKED_RANGES.any? { |range| range.include?(ip) }
     end
   end
+  private_class_method :validate_addresses!
 
   def self.parse(url)
     URI.parse(url.to_s)

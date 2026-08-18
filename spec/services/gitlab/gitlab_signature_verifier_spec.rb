@@ -5,25 +5,25 @@ require 'rails_helper'
 RSpec.describe Gitlab::GitlabSignatureVerifier do
   let(:secret) { 'test-secret' }
 
-  it 'acepta cuando el token de la cabecera coincide con el secreto' do
+  it 'accepts when the header token matches the secret' do
     expect(
       described_class.valid?(token_header: secret, secret: secret)
     ).to eq(true)
   end
 
-  it 'rechaza cuando el token de la cabecera no coincide con el secreto' do
+  it 'rejects when the header token does not match the secret' do
     expect(
       described_class.valid?(token_header: 'otro-secreto', secret: secret)
     ).to eq(false)
   end
 
-  it 'rechaza si no hay token en la cabecera' do
+  it 'rejects if there is no token in the header' do
     expect(
       described_class.valid?(token_header: nil, secret: secret)
     ).to eq(false)
   end
 
-  it 'rechaza si la cabecera es una cadena vacía' do
+  it 'rejects if the header is an empty string' do
     expect(
       described_class.valid?(token_header: '', secret: secret)
     ).to eq(false)

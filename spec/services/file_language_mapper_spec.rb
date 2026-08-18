@@ -26,7 +26,7 @@ RSpec.describe FileLanguageMapper do
     expect(described_class.tech_for('app/views/users/show.html.erb')).to eq('Ruby/Vistas')
   end
 
-  it 'recognices JavaScript/Frontend en varias extensiones' do
+  it 'recognices JavaScript/Frontend across several extensions' do
     %w[app.js component.jsx module.ts widget.tsx page.vue].each do |file|
       expect(described_class.tech_for(file)).to eq('JavaScript/Frontend')
     end
@@ -46,7 +46,7 @@ RSpec.describe FileLanguageMapper do
     expect(described_class.tech_for('.github/workflows/ci.yml')).to eq('DevOps/Config')
   end
 
-  it 'cae en Otros para extensiones desconocidas' do
+  it 'falls back to Otros for unknown extensions' do
     expect(described_class.tech_for('README.md')).to eq('Otros')
   end
 end

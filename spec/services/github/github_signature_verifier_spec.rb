@@ -10,7 +10,7 @@ RSpec.describe Github::GithubSignatureVerifier do
     "sha256=#{OpenSSL::HMAC.hexdigest(OpenSSL::Digest.new('sha256'), secret, body)}"
   end
 
-  it 'acepta una firma calculada correctamente con el secreto correcto' do
+  it 'accepts a signature correctly computed with the correct secret' do
     valid_signature = signature_for(body, secret)
 
     expect(
@@ -18,7 +18,7 @@ RSpec.describe Github::GithubSignatureVerifier do
     ).to eq(true)
   end
 
-  it 'rechaza una firma calculada con un secreto distinto' do
+  it 'rejects a signature computed with a different secret' do
     wrong_signature = signature_for(body, 'otro-secreto')
 
     expect(
@@ -26,13 +26,13 @@ RSpec.describe Github::GithubSignatureVerifier do
     ).to eq(false)
   end
 
-  it 'rechaza si no hay cabecera de firma' do
+  it 'rejects if there is no signature header' do
     expect(
       described_class.valid?(payload_body: body, signature_header: nil, secret: secret)
     ).to eq(false)
   end
 
-  it 'rechaza si el cuerpo del payload ha sido alterado' do
+  it 'rejects if the payload body has been tampered with' do
     valid_signature = signature_for(body, secret)
     tampered_body = '{"action":"closed"}'
 

@@ -7,18 +7,20 @@ class ApplicationController < ActionController::Base
   rescue_from ActiveRecord::Encryption::Errors::Base, with: :render_encryption_error
 
   def ensure_token
-    return unless current_user && tokens_not_configured
+    return unless current_user && tokens_not_configured?
 
     redirect_to configuration_path, alert: t('controllers.application.github_token_required')
   end
 
   private
 
-  def tokens_not_configured
+  def tokens_not_configured?
     current_user.configuration&.github_access_token.blank? && current_user.configuration&.gitlab_access_token.blank?
   end
 
-  def render_bad_request_error
+  def render_bad_request_error(exception)
+    Sentry.capture_exception(exception)
+
     redirect_to root_path, alert: t('controllers.application.errors.bad_request')
   end
 

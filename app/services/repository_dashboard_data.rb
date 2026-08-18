@@ -11,6 +11,11 @@ class RepositoryDashboardData
   end
 
   def initialize(repository)
+    if repository.nil?
+      Rails.logger.error('RepositoryDashboardData: repository is blank')
+      raise ActionController::ParameterMissing, 'RepositoryDashboardData: repository is blank'
+    end
+
     @repository = repository
   end
 

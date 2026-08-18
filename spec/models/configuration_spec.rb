@@ -63,6 +63,33 @@ RSpec.describe Configuration, type: :model do
     end
   end
 
+  describe '#gitlab_client' do
+    it 'pins the connection to the resolved IP of the configured host' do
+      configuration = build(:configuration, gitlab_url: 'https://gitlab.example.com')
+      allow(SsrfProtection).to receive(:resolve_pinned_ip!)
+        .with('https://gitlab.example.com').and_return('93.184.216.34')
+      gitlab_client = instance_double(Gitlab::Client)
+      expect(Gitlab).to receive(:client)
+        .with(
+          endpoint: 'https://gitlab.example.com/api/v4', private_token: 'secret-token',
+          httparty: {
+            connection_adapter: Gitlab::PinnedConnectionAdapter,
+            connection_adapter_options: { ssrf_safe_ip: '93.184.216.34' }
+          }
+        )
+        .and_return(gitlab_client)
+
+      expect(configuration.gitlab_client(private_token: 'secret-token')).to eq(gitlab_client)
+    end
+
+    it 'raises instead of building a client when the configured gitlab_url is unsafe' do
+      configuration = build(:configuration, gitlab_url: 'https://127.0.0.1')
+
+      expect { configuration.gitlab_client(private_token: 'secret-token') }
+        .to raise_error(SsrfProtection::UnsafeUrlError)
+    end
+  end
+
   describe 'gitlab_url safety (SSRF protection)' do
     it 'is valid without a gitlab_url' do
       configuration = build(:configuration, user: create(:user), gitlab_url: nil)

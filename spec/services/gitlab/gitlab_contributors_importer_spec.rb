@@ -5,6 +5,11 @@ require 'rails_helper'
 RSpec.describe Gitlab::GitlabContributorsImporter do
   describe '.call' do
     let(:repository) { create(:repository, github_full_name: 'acme/checkout-api', provider: 'gitlab') }
+    let(:pinned_ip) { '93.184.216.34' }
+
+    before do
+      allow(SsrfProtection).to receive(:resolve_pinned_ip!).and_return(pinned_ip)
+    end
 
     def gitlab_member(username)
       double(username: username)
@@ -55,7 +60,13 @@ RSpec.describe Gitlab::GitlabContributorsImporter do
       repository.user.configuration.update!(gitlab_url: 'https://gitlab.example.com')
       paginated = double(auto_paginate: nil)
       expect(Gitlab).to receive(:client)
-        .with(endpoint: 'https://gitlab.example.com/api/v4', private_token: repository.access_token)
+        .with(
+          endpoint: 'https://gitlab.example.com/api/v4', private_token: repository.access_token,
+          httparty: {
+            connection_adapter: Gitlab::PinnedConnectionAdapter,
+            connection_adapter_options: { ssrf_safe_ip: pinned_ip }
+          }
+        )
         .and_return(instance_double(Gitlab::Client, all_members: paginated))
 
       described_class.call(repository)
@@ -64,7 +75,13 @@ RSpec.describe Gitlab::GitlabContributorsImporter do
     it 'defaults to gitlab.com when no GitLab URL is configured' do
       paginated = double(auto_paginate: nil)
       expect(Gitlab).to receive(:client)
-        .with(endpoint: 'https://gitlab.com/api/v4', private_token: repository.access_token)
+        .with(
+          endpoint: 'https://gitlab.com/api/v4', private_token: repository.access_token,
+          httparty: {
+            connection_adapter: Gitlab::PinnedConnectionAdapter,
+            connection_adapter_options: { ssrf_safe_ip: pinned_ip }
+          }
+        )
         .and_return(instance_double(Gitlab::Client, all_members: paginated))
 
       described_class.call(repository)

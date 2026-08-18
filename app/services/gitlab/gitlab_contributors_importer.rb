@@ -22,9 +22,7 @@ module Gitlab
     attr_reader :repository
 
     def gitlab_client
-      @gitlab_client ||= ::Gitlab.client(
-        endpoint: repository.user.configuration.gitlab_api_endpoint, private_token: repository.access_token
-      )
+      @gitlab_client ||= repository.user.configuration.gitlab_client(private_token: repository.access_token)
     end
   end
 end

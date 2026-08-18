@@ -40,8 +40,6 @@ RSpec.describe ExpertiseCalculator do
 
     scores = described_class.map_for(contributor, repository)
 
-    # With a 90-day half-life, 180 days of age decays to 1/4 of the original weight.
-    # The total should be much closer to "100 + 100*0.25" than to "100 + 100".
     expect(scores['Ruby']).to be < 175
     expect(scores['Ruby']).to be > 100
   end

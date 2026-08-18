@@ -12,12 +12,29 @@ class Configuration < ApplicationRecord
   encrypts :gitlab_access_token
 
   def gitlab_api_endpoint
-    url = gitlab_url.presence || DEFAULT_GITLAB_URL
-    SsrfProtection.assert_safe!(url)
-    "#{url}/api/v4"
+    SsrfProtection.assert_safe!(gitlab_base_url)
+    "#{gitlab_base_url}/api/v4"
+  end
+
+  # Avoid DNS-rebinding window a plain
+  def gitlab_client(private_token:)
+    ssrf_safe_ip = SsrfProtection.resolve_pinned_ip!(gitlab_base_url)
+
+    ::Gitlab.client(
+      endpoint: "#{gitlab_base_url}/api/v4",
+      private_token: private_token,
+      httparty: {
+        connection_adapter: Gitlab::PinnedConnectionAdapter,
+        connection_adapter_options: { ssrf_safe_ip: ssrf_safe_ip }
+      }
+    )
   end
 
   private
+
+  def gitlab_base_url
+    gitlab_url.presence || DEFAULT_GITLAB_URL
+  end
 
   def gitlab_url_must_be_safe
     return if gitlab_url.blank?
