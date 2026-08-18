@@ -1,0 +1,4 @@
+en:
+  models:
+    configuration:
+      unsafe_gitlab_url: 'must be a public https URL, it cannot point to an internal or private address'

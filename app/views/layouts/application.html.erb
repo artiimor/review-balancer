@@ -18,7 +18,12 @@
     <%= javascript_importmap_tags %>
   </head>
 
-  <body class="min-h-screen bg-slate-50 dark:bg-slate-900">
+  <body class="relative min-h-screen overflow-x-hidden bg-slate-50 dark:bg-slate-950">
+    <div class="pointer-events-none fixed inset-0 -z-20 bg-gradient-to-br from-indigo-50 via-slate-50 to-violet-50 dark:from-slate-950 dark:via-slate-950 dark:to-indigo-950"></div>
+    <div class="pointer-events-none fixed inset-0 -z-10 opacity-[0.4] [background-image:radial-gradient(circle,var(--color-slate-300)_1px,transparent_1px)] [background-size:24px_24px] dark:opacity-[0.15] dark:[background-image:radial-gradient(circle,var(--color-slate-600)_1px,transparent_1px)]"></div>
+    <div class="pointer-events-none fixed -left-40 -top-40 -z-10 h-[32rem] w-[32rem] rounded-full bg-indigo-300/40 blur-3xl dark:bg-indigo-600/20"></div>
+    <div class="pointer-events-none fixed -bottom-40 -right-40 -z-10 h-[32rem] w-[32rem] rounded-full bg-violet-300/40 blur-3xl dark:bg-violet-700/20"></div>
+
     <button type="button" data-controller="theme" data-action="theme#toggle"
             class="fixed right-4 top-4 z-50 flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 shadow-sm transition hover:text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
             aria-label="<%= t('views.layouts.application.toggle_theme') %>">

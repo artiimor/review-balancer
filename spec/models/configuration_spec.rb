@@ -55,5 +55,53 @@ RSpec.describe Configuration, type: :model do
 
       expect(configuration.gitlab_api_endpoint).to eq('https://gitlab.example.com/api/v4')
     end
+
+    it 'raises when the configured gitlab_url points to a non-public address' do
+      configuration = build(:configuration, gitlab_url: 'https://127.0.0.1')
+
+      expect { configuration.gitlab_api_endpoint }.to raise_error(SsrfProtection::UnsafeUrlError)
+    end
+  end
+
+  describe 'gitlab_url safety (SSRF protection)' do
+    it 'is valid without a gitlab_url' do
+      configuration = build(:configuration, user: create(:user), gitlab_url: nil)
+
+      expect(configuration).to be_valid
+    end
+
+    it 'is valid with a public https gitlab_url' do
+      configuration = build(:configuration, user: create(:user), gitlab_url: 'https://8.8.8.8')
+
+      expect(configuration).to be_valid
+    end
+
+    it 'is invalid with a non-https gitlab_url' do
+      configuration = build(:configuration, user: create(:user), gitlab_url: 'http://gitlab.example.com')
+
+      expect(configuration).not_to be_valid
+      expect(configuration.errors[:gitlab_url]).to include(I18n.t('models.configuration.unsafe_gitlab_url'))
+    end
+
+    it 'is invalid when gitlab_url resolves to a loopback address' do
+      configuration = build(:configuration, user: create(:user), gitlab_url: 'https://127.0.0.1')
+
+      expect(configuration).not_to be_valid
+      expect(configuration.errors[:gitlab_url]).to include(I18n.t('models.configuration.unsafe_gitlab_url'))
+    end
+
+    it 'is invalid when gitlab_url resolves to a private network address' do
+      configuration = build(:configuration, user: create(:user), gitlab_url: 'https://10.0.0.5')
+
+      expect(configuration).not_to be_valid
+      expect(configuration.errors[:gitlab_url]).to include(I18n.t('models.configuration.unsafe_gitlab_url'))
+    end
+
+    it 'is invalid when gitlab_url resolves to the cloud metadata address' do
+      configuration = build(:configuration, user: create(:user), gitlab_url: 'https://169.254.169.254')
+
+      expect(configuration).not_to be_valid
+      expect(configuration.errors[:gitlab_url]).to include(I18n.t('models.configuration.unsafe_gitlab_url'))
+    end
   end
 end
